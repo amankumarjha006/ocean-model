@@ -1,0 +1,284 @@
+{
+  "id": "incois_synthetic_4d_normal",
+  "title": "INCOIS Indian Ocean 4D Synthetic Ocean Model (NORMAL)",
+  "institution": "Indian National Centre for Ocean Information Services (INCOIS), MoES",
+  "conventions": "CF-1.8, ACDD-1.3",
+  "source_model": "Procedural Synthetic Ocean-Data Generator (Vectorized NumPy)",
+  "summary": "Procedurally generated 4D ocean domain (10 time × 24 depth × 64 lat × 96 lon) representing physical oceanographic phenomena including thermocline stratification, mesoscale eddies, subsurface chlorophyll maximum, and correlated current velocities.",
+  "spatial_bounds": {
+    "min_latitude": 0.0,
+    "max_latitude": 30.0,
+    "min_longitude": 55.0,
+    "max_longitude": 100.0
+  },
+  "temporal_bounds": {
+    "start_time": "2026-09-01T00:00:00Z",
+    "end_time": "2026-09-03T06:00:00Z",
+    "time_steps_count": 10
+  },
+  "coordinates": {
+    "time": {
+      "units": "ISO-8601",
+      "calendar": "gregorian",
+      "values": [
+        "2026-09-01T00:00:00Z",
+        "2026-09-01T06:00:00Z",
+        "2026-09-01T12:00:00Z",
+        "2026-09-01T18:00:00Z",
+        "2026-09-02T00:00:00Z",
+        "2026-09-02T06:00:00Z",
+        "2026-09-02T12:00:00Z",
+        "2026-09-02T18:00:00Z",
+        "2026-09-03T00:00:00Z",
+        "2026-09-03T06:00:00Z"
+      ],
+      "start": "2026-09-01T00:00:00Z",
+      "end": "2026-09-03T06:00:00Z",
+      "step": "6h",
+      "count": 10
+    },
+    "depth": {
+      "units": "meters",
+      "positive": "down",
+      "standard_name": "depth",
+      "values": [
+        0.0,
+        5.0,
+        10.0,
+        20.0,
+        30.0,
+        40.0,
+        50.0,
+        60.0,
+        75.0,
+        100.0,
+        125.0,
+        150.0,
+        175.0,
+        200.0,
+        250.0,
+        300.0,
+        400.0,
+        500.0,
+        600.0,
+        700.0,
+        800.0,
+        900.0,
+        950.0,
+        1000.0
+      ],
+      "min_depth": 0.0,
+      "max_depth": 1000.0,
+      "count": 24
+    },
+    "latitude": {
+      "units": "degrees_north",
+      "standard_name": "latitude",
+      "min_val": 0.0,
+      "max_val": 30.0,
+      "step": 0.476,
+      "count": 64
+    },
+    "longitude": {
+      "units": "degrees_east",
+      "standard_name": "longitude",
+      "min_val": 55.0,
+      "max_val": 100.0,
+      "step": 0.474,
+      "count": 96
+    }
+  },
+  "variables": {
+    "temperature": {
+      "name": "temperature",
+      "display_name": "Sea Water Potential Temperature",
+      "units": "degC",
+      "standard_name": "sea_water_temperature",
+      "dimensions": [
+        "time",
+        "depth",
+        "latitude",
+        "longitude"
+      ],
+      "description": "Sea Water Potential Temperature for normal scenario",
+      "valid_min": 7.713,
+      "valid_max": 28.163,
+      "default_palette": "thermal",
+      "scale_type": "linear",
+      "fill_value": -9999.0
+    },
+    "salinity": {
+      "name": "salinity",
+      "display_name": "Sea Water Practical Salinity",
+      "units": "PSU",
+      "standard_name": "sea_water_salinity",
+      "dimensions": [
+        "time",
+        "depth",
+        "latitude",
+        "longitude"
+      ],
+      "description": "Sea Water Practical Salinity for normal scenario",
+      "valid_min": 32.0,
+      "valid_max": 37.446,
+      "default_palette": "haline",
+      "scale_type": "linear",
+      "fill_value": -9999.0
+    },
+    "chlorophyll": {
+      "name": "chlorophyll",
+      "display_name": "Chlorophyll-a Mass Concentration",
+      "units": "mg/m^3",
+      "standard_name": "mass_concentration_of_chlorophyll_a_in_sea_water",
+      "dimensions": [
+        "time",
+        "depth",
+        "latitude",
+        "longitude"
+      ],
+      "description": "Chlorophyll-a Mass Concentration for normal scenario",
+      "valid_min": 0.12,
+      "valid_max": 2.876,
+      "default_palette": "algae",
+      "scale_type": "log",
+      "fill_value": -9999.0
+    },
+    "u_current": {
+      "name": "u_current",
+      "display_name": "Zonal Velocity Component (U - Eastward)",
+      "units": "m/s",
+      "standard_name": "eastward_sea_water_velocity",
+      "dimensions": [
+        "time",
+        "depth",
+        "latitude",
+        "longitude"
+      ],
+      "description": "Zonal Velocity Component (U - Eastward) for normal scenario",
+      "valid_min": -1.015,
+      "valid_max": 1.743,
+      "default_palette": "coolwarm",
+      "scale_type": "linear",
+      "fill_value": -9999.0
+    },
+    "v_current": {
+      "name": "v_current",
+      "display_name": "Meridional Velocity Component (V - Northward)",
+      "units": "m/s",
+      "standard_name": "northward_sea_water_velocity",
+      "dimensions": [
+        "time",
+        "depth",
+        "latitude",
+        "longitude"
+      ],
+      "description": "Meridional Velocity Component (V - Northward) for normal scenario",
+      "valid_min": -1.402,
+      "valid_max": 1.246,
+      "default_palette": "coolwarm",
+      "scale_type": "linear",
+      "fill_value": -9999.0
+    },
+    "w_current": {
+      "name": "w_current",
+      "display_name": "Vertical Velocity Component (W - Upward)",
+      "units": "m/s",
+      "standard_name": "upward_sea_water_velocity",
+      "dimensions": [
+        "time",
+        "depth",
+        "latitude",
+        "longitude"
+      ],
+      "description": "Vertical Velocity Component (W - Upward) for normal scenario",
+      "valid_min": -0.007,
+      "valid_max": 0.008,
+      "default_palette": "coolwarm",
+      "scale_type": "linear",
+      "fill_value": -9999.0
+    }
+  },
+  "observations": [
+    {
+      "id": "argo_2903334",
+      "platform_type": "argo",
+      "platform_name": "INCOIS Argo Profiling Float #2903334 (Arabian Sea)",
+      "institution": "INCOIS / Argo India",
+      "variables_measured": [
+        "temperature",
+        "salinity"
+      ],
+      "time_range": [
+        "2026-09-01T00:00:00Z",
+        "2026-09-03T06:00:00Z"
+      ],
+      "depth_range_m": [
+        2.0,
+        1000.0
+      ],
+      "spatial_extent": [
+        66.0,
+        14.0,
+        68.5,
+        16.5
+      ],
+      "profile_count": 18,
+      "status": "active"
+    },
+    {
+      "id": "argo_2903335",
+      "platform_type": "argo",
+      "platform_name": "INCOIS Argo Profiling Float #2903335 (Bay of Bengal)",
+      "institution": "INCOIS / Argo India",
+      "variables_measured": [
+        "temperature",
+        "salinity",
+        "chlorophyll"
+      ],
+      "time_range": [
+        "2026-09-01T00:00:00Z",
+        "2026-09-03T06:00:00Z"
+      ],
+      "depth_range_m": [
+        2.0,
+        1000.0
+      ],
+      "spatial_extent": [
+        86.0,
+        11.5,
+        88.5,
+        14.0
+      ],
+      "profile_count": 14,
+      "status": "active"
+    },
+    {
+      "id": "glider_sg601",
+      "platform_type": "glider",
+      "platform_name": "Deep Ocean Mission Autonomous Glider SG-601",
+      "institution": "NIOT / INCOIS",
+      "variables_measured": [
+        "temperature",
+        "salinity",
+        "chlorophyll"
+      ],
+      "time_range": [
+        "2026-09-01T00:00:00Z",
+        "2026-09-03T06:00:00Z"
+      ],
+      "depth_range_m": [
+        0.0,
+        1000.0
+      ],
+      "spatial_extent": [
+        70.0,
+        8.0,
+        73.5,
+        11.0
+      ],
+      "profile_count": 92,
+      "status": "active"
+    }
+  ],
+  "version": "2.0.0-synthetic"
+}
