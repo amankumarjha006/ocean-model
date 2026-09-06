@@ -98,10 +98,11 @@ export function resolveVariableConfig(variableId: string, metadata?: VariableMet
       id: metadata.name,
       label: metadata.display_name || registered?.label || metadata.name,
       unit: metadata.units || registered?.unit || '',
-      defaultMin: metadata.valid_min ?? registered?.defaultMin ?? 0,
-      defaultMax: metadata.valid_max ?? registered?.defaultMax ?? 100,
-      palette: metadata.default_palette || registered?.palette || 'thermal',
-      scaleType: metadata.scale_type || registered?.scaleType || 'linear',
+      // Prioritize canonical registered bounds for stable visualization over raw dataset statistical bounds
+      defaultMin: registered?.defaultMin ?? metadata.valid_min ?? 0,
+      defaultMax: registered?.defaultMax ?? metadata.valid_max ?? 100,
+      palette: registered?.palette || metadata.default_palette || 'thermal',
+      scaleType: registered?.scaleType || metadata.scale_type || 'linear',
       step: registered?.step ?? 0.1,
       description: metadata.description || registered?.description || '',
     };

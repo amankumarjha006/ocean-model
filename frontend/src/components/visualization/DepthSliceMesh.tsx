@@ -115,10 +115,10 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
       <planeGeometry args={[boxWidth, boxDepth, 64, 64]} />
       <meshStandardMaterial
         map={texture}
-        roughness={0.25}
-        metalness={0.15}
+        roughness={0.35}
+        metalness={0.08}
         transparent
-        opacity={0.92}
+        opacity={0.95}
         side={THREE.DoubleSide}
       />
     </mesh>

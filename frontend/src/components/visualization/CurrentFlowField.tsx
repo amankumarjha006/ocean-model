@@ -203,8 +203,8 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
           args={[arrowGeometry, undefined as any, instanceCount]}
         >
           <meshStandardMaterial
-            roughness={0.2}
-            metalness={0.6}
+            roughness={0.35}
+            metalness={0.4}
             transparent
             opacity={currentOpacity}
           />
@@ -214,10 +214,10 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
       {/* Dynamic Advecting Streamline Particles */}
       <points ref={particlesRef} geometry={particleGeo}>
         <pointsMaterial
-          size={0.18}
-          color="#38bdf8"
+          size={0.12}
+          color="#7dd3fc"
           transparent
-          opacity={0.85}
+          opacity={0.65}
           blending={THREE.AdditiveBlending}
         />
       </points>

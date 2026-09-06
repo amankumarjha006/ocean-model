@@ -24,10 +24,10 @@ export const CoordinateGrid: React.FC = () => {
       <mesh position={[0, -boxHeight / 2, 0]}>
         <boxGeometry args={[boxWidth, boxHeight, boxDepth]} />
         <meshBasicMaterial
-          color="#0e7490"
+          color="#1e3a4f"
           wireframe
           transparent
-          opacity={0.35}
+          opacity={0.18}
         />
       </mesh>
 
@@ -35,10 +35,10 @@ export const CoordinateGrid: React.FC = () => {
       <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[boxWidth, boxDepth]} />
         <meshBasicMaterial
-          color="#06b6d4"
+          color="#164e63"
           wireframe
           transparent
-          opacity={0.2}
+          opacity={0.1}
         />
       </mesh>
 
@@ -64,7 +64,7 @@ export const CoordinateGrid: React.FC = () => {
             <edgesGeometry
               args={[new THREE.BoxGeometry(boxWidth, 0.01, boxDepth)]}
             />
-            <lineBasicMaterial color="#164e63" transparent opacity={0.25} />
+            <lineBasicMaterial color="#1e3a4f" transparent opacity={0.12} />
           </lineSegments>
         );
       })}

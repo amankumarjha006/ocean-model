@@ -17,15 +17,15 @@ export const LeftControlPanel: React.FC = () => {
     <aside className="left-control-panel" id="left-control-panel">
       <div className="panel-header">
         <div className="panel-title">
-          <SlidersHorizontal size={16} className="text-cyan" />
-          <span>Ocean Parameters & Modes</span>
+          <SlidersHorizontal size={14} />
+          <span>Controls</span>
         </div>
         <button
           className="panel-collapse-btn"
           onClick={toggleSidebar}
           title="Collapse Panel"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={14} />
         </button>
       </div>
 
@@ -41,4 +41,3 @@ export const LeftControlPanel: React.FC = () => {
     </aside>
   );
 };
-

@@ -128,16 +128,16 @@ export const OceanViewport: React.FC = () => {
           powerPreference: 'high-performance',
         }}
       >
-        <color attach="background" args={['#030712']} />
+        <color attach="background" args={['#040A15']} />
 
         {/* Lighting scheme optimized for subsurface ocean depth perception */}
-        <ambientLight intensity={0.65} color="#e0f2fe" />
-        <directionalLight position={[15, 25, 15]} intensity={1.2} color="#ffffff" castShadow />
-        <directionalLight position={[-12, -10, -12]} intensity={0.45} color="#0369a1" />
-        <pointLight position={[0, 10, 0]} intensity={0.5} color="#38bdf8" />
+        <ambientLight intensity={0.6} color="#dce8f5" />
+        <directionalLight position={[15, 25, 15]} intensity={1.1} color="#ffffff" castShadow />
+        <directionalLight position={[-12, -10, -12]} intensity={0.35} color="#0369a1" />
+        <pointLight position={[0, 10, 0]} intensity={0.25} color="#7dd3fc" />
 
         {/* Camera and Dynamic Preset Animation */}
-        <PerspectiveCamera makeDefault position={[18, 14, 22]} fov={45} />
+        <PerspectiveCamera makeDefault position={[16, 12, 18]} fov={45} />
         <CameraController />
 
         {/* Interactive Controls */}
@@ -157,11 +157,11 @@ export const OceanViewport: React.FC = () => {
           <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
             <planeGeometry args={[20, 12]} />
             <meshStandardMaterial
-              color="#0e7490"
-              roughness={0.1}
-              metalness={0.8}
+              color="#0c6478"
+              roughness={0.4}
+              metalness={0.3}
               transparent
-              opacity={0.3}
+              opacity={0.2}
               side={THREE.DoubleSide}
             />
           </mesh>

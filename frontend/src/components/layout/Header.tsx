@@ -1,6 +1,6 @@
 import React from 'react';
 import { useOceanStore } from '../../store/oceanStore';
-import { Waves, Activity, RotateCcw, PanelLeft, PanelRight, Globe, Layers } from 'lucide-react';
+import { Waves, Activity, RotateCcw, PanelLeft, PanelRight } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const {
@@ -39,12 +39,12 @@ export const Header: React.FC = () => {
           title="Toggle Controls Sidebar"
           id="btn-toggle-sidebar"
         >
-          <PanelLeft size={18} />
+          <PanelLeft size={16} />
         </button>
 
         <div className="brand-lockup">
           <div className="brand-logo">
-            <Waves className="ocean-wave-icon" size={22} />
+            <Waves size={20} />
           </div>
           <div className="brand-text">
             <div className="brand-title">
@@ -52,7 +52,7 @@ export const Header: React.FC = () => {
               <span className="prototype-badge">SIH 2026</span>
             </div>
             <div className="brand-subtitle">
-              INCOIS Ocean Data System &bull; ROMS 4D Model
+              INCOIS Ocean Data System
             </div>
           </div>
         </div>
@@ -60,42 +60,39 @@ export const Header: React.FC = () => {
 
       <div className="header-center">
         <div className="telemetry-chip">
-          <Globe size={14} className="chip-icon text-cyan" />
-          <span className="chip-label">Domain:</span>
-          <span className="chip-value">Indian Ocean (0°N-30°N, 55°E-100°E)</span>
+          <span className="chip-label">Domain</span>
+          <span className="chip-value mono" style={{ fontSize: '10px' }}>Indian Ocean 0–30°N, 55–100°E</span>
         </div>
 
-        {/* Scenario Selector Dropdown */}
-        <div className="telemetry-chip scenario-chip">
-          <span className="chip-label">Scenario:</span>
+        <div className="telemetry-chip">
+          <span className="chip-label">Scenario</span>
           <select
             value={selectedScenario}
             onChange={(e) => setSelectedScenario(e.target.value)}
-            className="scenario-select-dropdown mono"
+            className="scenario-select-dropdown"
             id="scenario-select"
           >
-            <option value="normal">Normal (Baseline Eddies)</option>
-            <option value="warm_eddy">Warm Core (Anticyclonic)</option>
-            <option value="cold_eddy">Cold Core (Upwelling)</option>
-            <option value="strong_currents">Strong Energetic Currents</option>
+            <option value="normal">Normal (Baseline)</option>
+            <option value="warm_eddy">Warm Eddy</option>
+            <option value="cold_eddy">Cold Eddy</option>
+            <option value="strong_currents">Strong Currents</option>
           </select>
         </div>
 
         <div className="telemetry-chip">
-          <Layers size={14} className="chip-icon text-amber" />
-          <span className="chip-label">Var:</span>
+          <span className="chip-label">Var</span>
           <span className="chip-value highlight">{varMeta?.display_name || selectedVariable}</span>
         </div>
 
         <div className="telemetry-chip">
-          <span className="chip-label">Depth:</span>
-          <span className="chip-value text-teal">
-            {selectedDepth === 0 ? 'Surface (0m)' : `-${selectedDepth}m`}
+          <span className="chip-label">Depth</span>
+          <span className="chip-value mono" style={{ color: 'var(--accent-teal-bright)' }}>
+            {selectedDepth === 0 ? '0 m' : `−${selectedDepth} m`}
           </span>
         </div>
 
         <div className="telemetry-chip">
-          <span className="chip-label">UTC:</span>
+          <span className="chip-label">UTC</span>
           <span className="chip-value mono">{formattedDate}</span>
         </div>
       </div>
@@ -103,8 +100,8 @@ export const Header: React.FC = () => {
       <div className="header-right">
         <div className={`status-pill ${backendOnline ? 'online' : 'offline'}`} id="backend-status-pill">
           <span className="pulse-dot"></span>
-          <Activity size={13} />
-          <span>{backendOnline ? 'API ONLINE' : 'API DISCONNECTED'}</span>
+          <Activity size={11} />
+          <span>{backendOnline ? 'ONLINE' : 'OFFLINE'}</span>
         </div>
 
         <button
@@ -113,8 +110,8 @@ export const Header: React.FC = () => {
           title="Reset Camera & Viewport"
           id="btn-reset-view"
         >
-          <RotateCcw size={14} />
-          <span>Reset View</span>
+          <RotateCcw size={13} />
+          <span>Reset</span>
         </button>
 
         <button
@@ -123,7 +120,7 @@ export const Header: React.FC = () => {
           title="Toggle Metadata Inspector"
           id="btn-toggle-inspector"
         >
-          <PanelRight size={18} />
+          <PanelRight size={16} />
         </button>
       </div>
     </header>

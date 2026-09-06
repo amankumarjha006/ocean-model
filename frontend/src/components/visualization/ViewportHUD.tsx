@@ -1,7 +1,7 @@
 import React from 'react';
 import { useOceanStore } from '../../store/oceanStore';
 import { createCssGradient } from '../../utils/colorScales';
-import { Layers, Eye, Compass, Crosshair } from 'lucide-react';
+import { Compass, Eye, Layers, Crosshair } from 'lucide-react';
 
 export const ViewportHUD: React.FC = () => {
   const {
@@ -26,10 +26,10 @@ export const ViewportHUD: React.FC = () => {
 
   const getModeLabel = () => {
     switch (vizMode) {
-      case 'slice': return 'DEPTH SLICE (2D GPU)';
-      case 'volume': return '3D LAYERED VOLUME';
-      case 'currents': return 'CURRENT VECTORS / FLOW';
-      case 'isosurface': return '3D ISOSURFACE (MARCHING CUBES)';
+      case 'slice': return 'DEPTH SLICE';
+      case 'volume': return '3D VOLUME';
+      case 'currents': return 'CURRENTS';
+      case 'isosurface': return 'ISOSURFACE';
     }
   };
 
@@ -38,33 +38,32 @@ export const ViewportHUD: React.FC = () => {
       {/* Top-Left HUD Info */}
       <div className="hud-card hud-top-left">
         <div className="hud-row">
-          <Layers size={13} className="text-cyan" />
           <span className="hud-title">{varMeta?.display_name || selectedVariable}</span>
           <span className="prototype-badge">{selectedScenario.toUpperCase()}</span>
           <span className="mode-pill-badge">{getModeLabel()}</span>
         </div>
-        <div className="hud-sub">
-          <span>Depth: </span>
-          <strong className="text-teal mono">
-            {selectedDepth === 0 ? 'Sea Surface (0m)' : `-${selectedDepth.toFixed(1)} m`}
-          </strong>
-        </div>
-        <div className="hud-sub">
-          <span>Exaggeration: </span>
-          <span className="mono">{verticalExaggeration}x</span>
+        <div className="hud-sub mono">
+          <span style={{ color: 'var(--text-dim)' }}>Depth </span>
+          <span style={{ color: 'var(--accent-teal-bright)' }}>
+            {selectedDepth === 0 ? '0 m (surface)' : `−${selectedDepth.toFixed(1)} m`}
+          </span>
+          <span style={{ color: 'var(--text-dim)', marginLeft: '8px' }}>Z-scale </span>
+          <span>{verticalExaggeration}×</span>
         </div>
         {currentSlice && (
           <div className="hud-slice-stats mono">
-            <span className="stat-item" title="Slice Min">
-              Min: <strong className="text-cyan">{currentSlice.min.toFixed(2)}</strong>
+            <span className="stat-item">
+              Min <strong style={{ color: 'var(--text-secondary)' }}>{currentSlice.min.toFixed(2)}</strong>
             </span>
-            <span className="stat-item" title="Slice Mean">
-              Mean: <strong className="text-teal">{currentSlice.mean.toFixed(2)}</strong>
+            <span className="stat-item">
+              Mean <strong style={{ color: 'var(--text-secondary)' }}>{currentSlice.mean.toFixed(2)}</strong>
             </span>
-            <span className="stat-item" title="Slice Max">
-              Max: <strong className="text-amber">{currentSlice.max.toFixed(2)}</strong>
+            <span className="stat-item">
+              Max <strong style={{ color: 'var(--text-secondary)' }}>{currentSlice.max.toFixed(2)}</strong>
             </span>
-            <span className="stat-item text-muted">[{currentSlice.shape[0]}×{currentSlice.shape[1]}]</span>
+            <span className="stat-item" style={{ color: 'var(--text-dim)' }}>
+              [{currentSlice.shape[0]}×{currentSlice.shape[1]}]
+            </span>
           </div>
         )}
       </div>
@@ -75,26 +74,26 @@ export const ViewportHUD: React.FC = () => {
           <button
             className={`cam-preset-btn ${cameraPreset === 'default' ? 'active' : ''}`}
             onClick={() => setCameraPreset('default')}
-            title="3D Isometric Orbit View"
+            title="3D Isometric View"
           >
-            <Compass size={12} />
-            <span>3D View</span>
+            <Compass size={11} />
+            <span>3D</span>
           </button>
           <button
             className={`cam-preset-btn ${cameraPreset === 'top' ? 'active' : ''}`}
             onClick={() => setCameraPreset('top')}
-            title="Top-Down 2D Map (Lat/Lon View)"
+            title="Top-Down Map View"
           >
-            <Eye size={12} />
-            <span>Top Map</span>
+            <Eye size={11} />
+            <span>Map</span>
           </button>
           <button
             className={`cam-preset-btn ${cameraPreset === 'side' ? 'active' : ''}`}
             onClick={() => setCameraPreset('side')}
-            title="Side Cross-Section (Depth Profile)"
+            title="Side Cross-Section"
           >
-            <Layers size={12} />
-            <span>Side Profile</span>
+            <Layers size={11} />
+            <span>Section</span>
           </button>
         </div>
       </div>
@@ -112,22 +111,26 @@ export const ViewportHUD: React.FC = () => {
           }}
         >
           <div className="tooltip-header">
-            <Crosshair size={12} className="text-cyan" />
-            <span className="tooltip-title">Field Inspection</span>
+            <Crosshair size={11} />
+            <span className="tooltip-title">Inspection</span>
           </div>
           <div className="tooltip-body mono">
             <div className="tooltip-row">
-              <span className="text-muted">Lat / Lon:</span>
-              <span className="text-white">{hoveredPoint.lat.toFixed(2)}°N, {hoveredPoint.lon.toFixed(2)}°E</span>
+              <span style={{ color: 'var(--text-dim)' }}>Position</span>
+              <span>{hoveredPoint.lat.toFixed(2)}°N, {hoveredPoint.lon.toFixed(2)}°E</span>
             </div>
             <div className="tooltip-row">
-              <span className="text-muted">Depth:</span>
-              <span className="text-teal">-{hoveredPoint.depth} m</span>
+              <span style={{ color: 'var(--text-dim)' }}>Depth</span>
+              <span style={{ color: 'var(--accent-teal-bright)' }}>−{hoveredPoint.depth} m</span>
             </div>
             <div className="tooltip-row highlight-row">
-              <span className="text-cyan font-bold">{hoveredPoint.varName}:</span>
-              <span className="text-amber font-bold text-base">
-                {hoveredPoint.val} <small className="text-muted font-normal">{hoveredPoint.units}</small>
+              <span style={{ color: 'var(--text-secondary)' }}>{hoveredPoint.varName}</span>
+              <span>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '13px' }}>
+                  {hoveredPoint.val}
+                </strong>
+                {' '}
+                <span style={{ color: 'var(--text-dim)', fontSize: '10px' }}>{hoveredPoint.units}</span>
               </span>
             </div>
           </div>
@@ -151,11 +154,11 @@ export const ViewportHUD: React.FC = () => {
         </div>
       </div>
 
-      {/* Coordinate axes helper badge in Bottom-Left */}
+      {/* Coordinate axes helper in Bottom-Left */}
       <div className="hud-card hud-axes-legend">
-        <div className="axis-item"><span className="axis-dot red" /> X: Longitude (55°E - 100°E)</div>
-        <div className="axis-item"><span className="axis-dot green" /> Y: Depth (0 to -1000m)</div>
-        <div className="axis-item"><span className="axis-dot blue" /> Z: Latitude (0°N - 30°N)</div>
+        <div className="axis-item"><span className="axis-dot red" /> X  Lon 55–100°E</div>
+        <div className="axis-item"><span className="axis-dot green" /> Y  Depth 0–1000m</div>
+        <div className="axis-item"><span className="axis-dot blue" /> Z  Lat 0–30°N</div>
       </div>
     </div>
   );

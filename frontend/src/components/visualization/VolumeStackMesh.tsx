@@ -34,16 +34,22 @@ export const VolumeStackMesh: React.FC<VolumeStackMeshProps> = ({
       return [];
     }
 
+    const totalLayers = volumeData.data.length;
     return volumeData.data.map((depthMatrix, idx) => {
       const depthM = volumeData.depths[idx] ?? 0;
       const yPos = -(depthM / maxDepthMeters) * activeBoxHeight;
+
+      // Depth-dependent opacity: surface layers more visible, deep layers fade
+      const depthFraction = idx / Math.max(1, totalLayers - 1);
+      const layerOpacity = volumeOpacity * (1.0 - depthFraction * 0.5);
+
       const tex = createDataTexture(
         depthMatrix,
         colorMin,
         colorMax,
         colorScale,
         scaleType,
-        Math.round(volumeOpacity * 255)
+        Math.round(layerOpacity * 255)
       );
 
       return {
@@ -51,6 +57,7 @@ export const VolumeStackMesh: React.FC<VolumeStackMeshProps> = ({
         depthM,
         yPos,
         index: idx,
+        opacity: layerOpacity,
       };
     });
   }, [volumeData, activeBoxHeight, colorMin, colorMax, colorScale, scaleType, volumeOpacity, maxDepthMeters]);
@@ -70,10 +77,10 @@ export const VolumeStackMesh: React.FC<VolumeStackMeshProps> = ({
           <planeGeometry args={[boxWidth, boxDepth, 32, 32]} />
           <meshStandardMaterial
             map={layer.texture}
-            roughness={0.3}
-            metalness={0.1}
+            roughness={0.55}
+            metalness={0.05}
             transparent
-            opacity={volumeOpacity}
+            opacity={layer.opacity}
             depthWrite={false}
             side={THREE.DoubleSide}
           />

@@ -35,15 +35,15 @@ export const RightInfoPanel: React.FC = () => {
     <aside className="right-info-panel" id="right-info-panel">
       <div className="panel-header">
         <div className="panel-title">
-          <Info size={16} className="text-cyan" />
-          <span>Scientific Metadata & Inspector</span>
+          <Info size={14} />
+          <span>Inspector</span>
         </div>
         <button
           className="panel-collapse-btn"
           onClick={toggleInspector}
           title="Collapse Inspector"
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={14} />
         </button>
       </div>
 
@@ -53,7 +53,7 @@ export const RightInfoPanel: React.FC = () => {
           className={`tab-btn ${activeTab === 'metadata' ? 'active' : ''}`}
           onClick={() => setActiveTab('metadata')}
         >
-          <Database size={13} />
+          <Database size={12} />
           <span>Variable</span>
         </button>
         <button
@@ -66,8 +66,8 @@ export const RightInfoPanel: React.FC = () => {
           className={`tab-btn ${activeTab === 'observations' ? 'active' : ''}`}
           onClick={() => setActiveTab('observations')}
         >
-          <Radio size={13} />
-          <span>Observations ({observations.length})</span>
+          <Radio size={12} />
+          <span>Obs ({observations.length})</span>
         </button>
       </div>
 
@@ -81,38 +81,38 @@ export const RightInfoPanel: React.FC = () => {
                   <div className="meta-badge-row">
                     <span className="meta-badge primary">{varMeta.name}</span>
                     <span className="meta-badge accent">{varMeta.units}</span>
-                    <span className="meta-badge muted">CF-1.8 Compliant</span>
+                    <span className="meta-badge muted">CF-1.8</span>
                   </div>
                   <p className="meta-description">{varMeta.description}</p>
                 </div>
 
                 <div className="meta-table">
                   <div className="meta-row">
-                    <span className="meta-key">CF Standard Name</span>
+                    <span className="meta-key">Standard Name</span>
                     <span className="meta-val mono">{varMeta.standard_name}</span>
                   </div>
                   <div className="meta-row">
-                    <span className="meta-key">Dimensions (4D)</span>
+                    <span className="meta-key">Dimensions</span>
                     <span className="meta-val mono">
-                      [{varMeta.dimensions.join(', ')}]
+                      [{varMeta.dimensions.join(' × ')}]
                     </span>
                   </div>
                   <div className="meta-row">
-                    <span className="meta-key">Physical Units</span>
+                    <span className="meta-key">Units</span>
                     <span className="meta-val mono">{varMeta.units}</span>
                   </div>
                   <div className="meta-row">
                     <span className="meta-key">Valid Range</span>
                     <span className="meta-val mono">
-                      [{varMeta.valid_min ?? 'N/A'}, {varMeta.valid_max ?? 'N/A'}]
+                      {varMeta.valid_min ?? 'N/A'} → {varMeta.valid_max ?? 'N/A'}
                     </span>
                   </div>
                   <div className="meta-row">
-                    <span className="meta-key">Scale Transform</span>
+                    <span className="meta-key">Scale</span>
                     <span className="meta-val mono">{varMeta.scale_type}</span>
                   </div>
                   <div className="meta-row">
-                    <span className="meta-key">Default Colormap</span>
+                    <span className="meta-key">Palette</span>
                     <span className="meta-val mono">{varMeta.default_palette}</span>
                   </div>
                 </div>
@@ -120,26 +120,28 @@ export const RightInfoPanel: React.FC = () => {
                 {dataset && (
                   <div className="dataset-global-card">
                     <div className="global-card-header">
-                      <FileCode size={14} className="text-cyan" />
-                      <span>Model Configuration</span>
+                      <FileCode size={12} />
+                      <span>Dataset</span>
                     </div>
                     <div className="global-prop">
-                      <span className="global-key">Model Source:</span>
+                      <span className="global-key">Source</span>
                       <span className="global-val">{dataset.source_model}</span>
                     </div>
                     <div className="global-prop">
-                      <span className="global-key">Publishing Agency:</span>
+                      <span className="global-key">Institution</span>
                       <span className="global-val">{dataset.institution}</span>
                     </div>
                     <div className="global-prop">
-                      <span className="global-key">Conventions:</span>
+                      <span className="global-key">Conventions</span>
                       <span className="global-val">{dataset.conventions}</span>
                     </div>
                   </div>
                 )}
               </>
             ) : (
-              <div className="empty-state">Select a variable to view its CF metadata.</div>
+              <div className="empty-state" style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>
+                Select a variable to view its CF metadata.
+              </div>
             )}
           </div>
         )}
@@ -149,7 +151,7 @@ export const RightInfoPanel: React.FC = () => {
         {activeTab === 'observations' && (
           <div className="observations-container">
             <div className="obs-intro">
-              In-situ observational platforms synchronized with the 4D model domain for comparison and validation.
+              In-situ platforms synchronized with the 4D model domain for validation.
             </div>
 
             <div className="obs-cards-list">
@@ -167,31 +169,31 @@ export const RightInfoPanel: React.FC = () => {
                     <div className="obs-card-top">
                       <div className="obs-type-indicator">
                         {isArgo ? (
-                          <Radio size={14} className="text-amber" />
+                          <Radio size={13} className="text-amber" />
                         ) : (
-                          <Navigation size={14} className="text-emerald" />
+                          <Navigation size={13} className="text-emerald" />
                         )}
-                        <span className="obs-name">{obs.platform_name}</span>
+                        <span>{obs.platform_name}</span>
                       </div>
                       <span className="status-tag active">
-                        <CheckCircle2 size={11} />
+                        <CheckCircle2 size={10} />
                         <span>{obs.status}</span>
                       </span>
                     </div>
 
                     <div className="obs-details-grid">
                       <div className="obs-detail">
-                        <span className="obs-detail-label">WMO / ID:</span>
+                        <span className="obs-detail-label">ID:</span>
                         <span className="obs-detail-val mono">{obs.id}</span>
                       </div>
                       <div className="obs-detail">
                         <span className="obs-detail-label">Profiles:</span>
-                        <span className="obs-detail-val">{obs.profile_count} casts</span>
+                        <span className="obs-detail-val">{obs.profile_count}</span>
                       </div>
                       <div className="obs-detail">
-                        <span className="obs-detail-label">Depth Range:</span>
+                        <span className="obs-detail-label">Depth:</span>
                         <span className="obs-detail-val">
-                          {obs.depth_range_m[0]}m - {obs.depth_range_m[1]}m
+                          {obs.depth_range_m[0]}–{obs.depth_range_m[1]} m
                         </span>
                       </div>
                       <div className="obs-detail">
@@ -201,7 +203,7 @@ export const RightInfoPanel: React.FC = () => {
                     </div>
 
                     <div className="obs-vars-measured">
-                      <span className="measured-label">Variables:</span>
+                      <span className="measured-label">Vars:</span>
                       {obs.variables_measured.map((v) => (
                         <span key={v} className="measured-pill">{v}</span>
                       ))}
