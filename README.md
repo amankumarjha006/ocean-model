@@ -18,6 +18,15 @@ A browser-native scientific 3D visualization platform built for exploring multi-
 
 ## Quick Start Guide
 
+### Quick Run (Frontend & Backend Simultaneously)
+
+```bash
+# From project root directory
+python run.py
+```
+
+---
+
 ### Prerequisites
 - Python 3.11+
 - Node.js v18+ (tested on Node v22)
