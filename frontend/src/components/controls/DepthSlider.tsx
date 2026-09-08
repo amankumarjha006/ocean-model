@@ -1,28 +1,26 @@
 import React from 'react';
 import { useOceanStore } from '../../store/oceanStore';
-import { ArrowDown, Anchor } from 'lucide-react';
 
 export const DepthSlider: React.FC = () => {
-  const { dataset, selectedDepth, setSelectedDepth } = useOceanStore();
+  const dataset = useOceanStore((s) => s.dataset);
+  const selectedDepth = useOceanStore((s) => s.selectedDepth);
+  const setSelectedDepth = useOceanStore((s) => s.setSelectedDepth);
 
-  const depthLevels = dataset?.coordinates.depth.values || [
-    0, 5, 10, 25, 50, 75, 100, 150, 200, 300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000
+  const depthLevels = dataset?.coordinates?.depth?.values || [
+    0, 5, 10, 25, 50, 75, 100, 150, 200, 300, 500, 750, 1000
   ];
-  const maxDepth = depthLevels[depthLevels.length - 1] || 5000;
+  const maxDepth = depthLevels[depthLevels.length - 1] || 1000;
 
-  // Preset oceanic vertical strata
   const PRESETS = [
-    { label: 'Surface', depth: 0, tag: '0m' },
-    { label: 'Mixed Layer', depth: 50, tag: '50m' },
-    { label: 'Thermocline', depth: 200, tag: '200m' },
-    { label: 'Intermediate', depth: 1000, tag: '1000m' },
-    { label: 'Deep Abyssal', depth: 4000, tag: '4000m' },
+    { label: 'Surface', depth: 0 },
+    { label: 'Mixed Layer', depth: 50 },
+    { label: 'Thermocline', depth: 200 },
+    { label: 'Intermediate', depth: 500 },
+    { label: 'Deep Ocean', depth: 1000 },
   ];
 
-  // Helper to find nearest discrete depth
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawVal = parseFloat(e.target.value);
-    // Find closest discrete level in model
     const closest = depthLevels.reduce((prev, curr) =>
       Math.abs(curr - rawVal) < Math.abs(prev - rawVal) ? curr : prev
     );
@@ -30,37 +28,16 @@ export const DepthSlider: React.FC = () => {
   };
 
   return (
-    <div className="control-section">
-      <div className="section-header">
-        <div className="section-title">
-          <ArrowDown size={15} className="text-teal" />
-          <span>Depth Slicing (Z-Axis)</span>
-        </div>
-        <div className="depth-readout">
-          <Anchor size={12} className="inline-icon" />
-          <span className="depth-val">
-            {selectedDepth === 0 ? '0.0 m (Sea Surface)' : `-${selectedDepth.toFixed(1)} m`}
-          </span>
-        </div>
-      </div>
-
-      {/* Preset Strata Buttons */}
-      <div className="depth-presets">
-        {PRESETS.map((preset) => (
-          <button
-            key={preset.label}
-            className={`preset-chip ${selectedDepth === preset.depth ? 'active' : ''}`}
-            onClick={() => setSelectedDepth(preset.depth)}
-            id={`preset-depth-${preset.depth}`}
-          >
-            <span>{preset.label}</span>
-            <span className="preset-depth-tag">{preset.tag}</span>
-          </button>
-        ))}
+    <div className="control-group" id="depth-control-group">
+      <div className="section-header-compact">
+        <span className="section-title-label">DEPTH</span>
+        <span className="depth-numeric-readout mono">
+          {selectedDepth === 0 ? '0 m (Surface)' : `−${selectedDepth.toFixed(1)} m`}
+        </span>
       </div>
 
       {/* Range Slider */}
-      <div className="slider-wrapper">
+      <div className="slider-container">
         <input
           type="range"
           min="0"
@@ -68,15 +45,29 @@ export const DepthSlider: React.FC = () => {
           step="5"
           value={selectedDepth}
           onChange={handleSliderChange}
-          className="depth-range-input"
+          className="slider-input depth-slider"
           id="depth-slider-input"
+          aria-label="Depth slice slider"
         />
-        <div className="slider-ticks">
-          <span>0m (Surface)</span>
-          <span>1000m</span>
-          <span>2500m</span>
-          <span>{maxDepth}m</span>
+        <div className="range-bounds mono">
+          <span>0 m</span>
+          <span>500 m</span>
+          <span>{maxDepth} m</span>
         </div>
+      </div>
+
+      {/* Preset Strata Buttons */}
+      <div className="strata-presets">
+        {PRESETS.map((preset) => (
+          <button
+            key={preset.label}
+            className={`strata-btn ${Math.abs(selectedDepth - preset.depth) < 1 ? 'active' : ''}`}
+            onClick={() => setSelectedDepth(preset.depth)}
+            id={`preset-depth-${preset.depth}`}
+          >
+            {preset.label}
+          </button>
+        ))}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useOceanStore } from '../../store/oceanStore';
 import { createCssGradient } from '../../utils/colorScales';
-import { Compass, Eye, Layers, Crosshair } from 'lucide-react';
+import { Crosshair } from 'lucide-react';
 
 const HoverInspectionTooltip: React.FC = () => {
   const hoveredPoint = useOceanStore((s) => s.hoveredPoint);
@@ -9,36 +9,32 @@ const HoverInspectionTooltip: React.FC = () => {
 
   return (
     <div
-      className="hud-card hud-inspection-tooltip"
+      className="hud-inspection-tooltip"
       style={{
         position: 'fixed',
-        left: `${Math.min(window.innerWidth - 240, hoveredPoint.x + 16)}px`,
-        top: `${Math.min(window.innerHeight - 150, hoveredPoint.y - 40)}px`,
+        left: `${Math.min(window.innerWidth - 220, hoveredPoint.x + 14)}px`,
+        top: `${Math.min(window.innerHeight - 130, hoveredPoint.y - 30)}px`,
         pointerEvents: 'none',
         zIndex: 9999,
       }}
     >
-      <div className="tooltip-header">
+      <div className="tooltip-title-bar">
         <Crosshair size={11} />
-        <span className="tooltip-title">Inspection</span>
+        <span>Inspection</span>
       </div>
-      <div className="tooltip-body mono">
-        <div className="tooltip-row">
-          <span style={{ color: 'var(--text-dim)' }}>Position</span>
-          <span>{hoveredPoint.lat.toFixed(2)}°N, {hoveredPoint.lon.toFixed(2)}°E</span>
+      <div className="tooltip-table mono">
+        <div className="tooltip-kv">
+          <span className="tooltip-k">Pos</span>
+          <span className="tooltip-v">{hoveredPoint.lat.toFixed(2)}°N, {hoveredPoint.lon.toFixed(2)}°E</span>
         </div>
-        <div className="tooltip-row">
-          <span style={{ color: 'var(--text-dim)' }}>Depth</span>
-          <span style={{ color: 'var(--accent-teal-bright)' }}>−{hoveredPoint.depth} m</span>
+        <div className="tooltip-kv">
+          <span className="tooltip-k">Depth</span>
+          <span className="tooltip-v">−{hoveredPoint.depth} m</span>
         </div>
-        <div className="tooltip-row highlight-row">
-          <span style={{ color: 'var(--text-secondary)' }}>{hoveredPoint.varName}</span>
-          <span>
-            <strong style={{ color: 'var(--text-primary)', fontSize: '13px' }}>
-              {hoveredPoint.val}
-            </strong>
-            {' '}
-            <span style={{ color: 'var(--text-dim)', fontSize: '10px' }}>{hoveredPoint.units}</span>
+        <div className="tooltip-kv primary-val">
+          <span className="tooltip-k">{hoveredPoint.varName}</span>
+          <span className="tooltip-v">
+            <strong>{hoveredPoint.val}</strong> {hoveredPoint.units}
           </span>
         </div>
       </div>
@@ -47,7 +43,6 @@ const HoverInspectionTooltip: React.FC = () => {
 };
 
 export const ViewportHUD: React.FC = () => {
-  const vizMode = useOceanStore((s) => s.vizMode);
   const cameraPreset = useOceanStore((s) => s.cameraPreset);
   const setCameraPreset = useOceanStore((s) => s.setCameraPreset);
   const selectedVariable = useOceanStore((s) => s.selectedVariable);
@@ -57,112 +52,111 @@ export const ViewportHUD: React.FC = () => {
   const colorMax = useOceanStore((s) => s.colorMax);
   const scaleType = useOceanStore((s) => s.scaleType);
   const dataset = useOceanStore((s) => s.dataset);
-  const verticalExaggeration = useOceanStore((s) => s.verticalExaggeration);
   const currentSlice = useOceanStore((s) => s.currentSlice);
   const selectedScenario = useOceanStore((s) => s.selectedScenario);
 
-  const varMeta = dataset?.variables[selectedVariable];
+  const varMeta = dataset?.variables?.[selectedVariable];
   const unit = varMeta?.units || '';
-
-  const getModeLabel = () => {
-    switch (vizMode) {
-      case 'slice': return 'DEPTH SLICE';
-      case 'volume': return '3D VOLUME';
-      case 'currents': return 'CURRENTS';
-      case 'isosurface': return 'ISOSURFACE';
-    }
-  };
+  const displayName = varMeta?.display_name || selectedVariable;
 
   return (
     <div className="viewport-hud-overlay">
-      {/* Top-Left HUD Info */}
-      <div className="hud-card hud-top-left">
-        <div className="hud-row">
-          <span className="hud-title">{varMeta?.display_name || selectedVariable}</span>
-          <span className="prototype-badge">{selectedScenario.toUpperCase()}</span>
-          <span className="mode-pill-badge">{getModeLabel()}</span>
+      {/* Top-Left: Scientific Workstation Status Box */}
+      <div className="hud-panel hud-top-left">
+        <div className="hud-title-row">
+          <span className="hud-primary-title">{displayName.toUpperCase()}</span>
+          <span className="hud-scenario-tag mono">{selectedScenario}</span>
         </div>
-        <div className="hud-sub mono">
-          <span style={{ color: 'var(--text-dim)' }}>Depth </span>
-          <span style={{ color: 'var(--accent-teal-bright)' }}>
-            {selectedDepth === 0 ? '0 m (surface)' : `−${selectedDepth.toFixed(1)} m`}
-          </span>
-          <span style={{ color: 'var(--text-dim)', marginLeft: '8px' }}>Z-scale </span>
-          <span>{verticalExaggeration}×</span>
+
+        <div className="hud-depth-row mono">
+          <span className="text-muted">Depth</span>
+          <span className="text-accent">{selectedDepth === 0 ? '0 m (Surface)' : `−${selectedDepth.toFixed(1)} m`}</span>
         </div>
+
         {currentSlice && (
-          <div className="hud-slice-stats mono">
-            <span className="stat-item">
-              Min <strong style={{ color: 'var(--text-secondary)' }}>{currentSlice.min.toFixed(2)}</strong>
-            </span>
-            <span className="stat-item">
-              Mean <strong style={{ color: 'var(--text-secondary)' }}>{currentSlice.mean.toFixed(2)}</strong>
-            </span>
-            <span className="stat-item">
-              Max <strong style={{ color: 'var(--text-secondary)' }}>{currentSlice.max.toFixed(2)}</strong>
-            </span>
-            <span className="stat-item" style={{ color: 'var(--text-dim)' }}>
-              [{currentSlice.shape[0]}×{currentSlice.shape[1]}]
-            </span>
+          <div className="hud-stats-grid mono">
+            <div className="hud-stat-col">
+              <span className="hud-stat-label">MIN</span>
+              <span className="hud-stat-num">{currentSlice.min.toFixed(2)}</span>
+            </div>
+            <div className="hud-stat-col">
+              <span className="hud-stat-label">MEAN</span>
+              <span className="hud-stat-num">{currentSlice.mean.toFixed(2)}</span>
+            </div>
+            <div className="hud-stat-col">
+              <span className="hud-stat-label">MAX</span>
+              <span className="hud-stat-num">{currentSlice.max.toFixed(2)}</span>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Camera Presets Toolbar (Top-Right) */}
-      <div className="hud-card hud-camera-bar">
-        <div className="hud-camera-buttons">
+      {/* Top-Right: Minimal Navigation Controls [ 3D ] [ Map ] [ Section ] */}
+      <div className="hud-panel hud-camera-bar">
+        <div className="camera-nav-group" role="group" aria-label="Camera Presets">
           <button
-            className={`cam-preset-btn ${cameraPreset === 'default' ? 'active' : ''}`}
+            className={`cam-nav-btn ${cameraPreset === 'default' ? 'active' : ''}`}
             onClick={() => setCameraPreset('default')}
             title="3D Isometric View"
           >
-            <Compass size={11} />
-            <span>3D</span>
+            3D
           </button>
           <button
-            className={`cam-preset-btn ${cameraPreset === 'top' ? 'active' : ''}`}
+            className={`cam-nav-btn ${cameraPreset === 'top' ? 'active' : ''}`}
             onClick={() => setCameraPreset('top')}
             title="Top-Down Map View"
           >
-            <Eye size={11} />
-            <span>Map</span>
+            Map
           </button>
           <button
-            className={`cam-preset-btn ${cameraPreset === 'side' ? 'active' : ''}`}
+            className={`cam-nav-btn ${cameraPreset === 'side' ? 'active' : ''}`}
             onClick={() => setCameraPreset('side')}
             title="Side Cross-Section"
           >
-            <Layers size={11} />
-            <span>Section</span>
+            Section
           </button>
         </div>
       </div>
 
-      {/* Floating Scientific Hover Tooltip (Isolated component) */}
+      {/* Floating Scientific Hover Tooltip */}
       <HoverInspectionTooltip />
 
-      {/* Floating Colorbar in Bottom-Right */}
-      <div className="hud-card hud-colorbar">
+      {/* Bottom-Right: Clean Restrained Colorbar */}
+      <div className="hud-panel hud-colorbar">
         <div className="hud-colorbar-header">
-          <span className="hud-var-title">{varMeta?.display_name || selectedVariable}</span>
-          <span className="hud-scale-badge mono">{scaleType.toUpperCase()}</span>
+          <span className="colorbar-var-title">{displayName}</span>
+          <span className="colorbar-scale-type mono">{scaleType.toUpperCase()}</span>
         </div>
         <div
-          className="hud-gradient-strip"
+          className="hud-gradient-bar"
           style={{ background: createCssGradient(colorScale) }}
         />
-        <div className="hud-colorbar-ticks mono">
+        <div className="hud-colorbar-labels mono">
           <span>{colorMin.toFixed(1)}</span>
-          <span className="hud-unit">{unit}</span>
+          <span className="colorbar-unit">{unit}</span>
           <span>{colorMax.toFixed(1)}</span>
         </div>
       </div>
 
-      {/* Coordinate axes legend in Bottom-Left */}
-      <div className="hud-card hud-axes-legend">
-        <div className="axis-item"><span className="axis-dot red" /> X  Lon 55–100°E</div>
-        <div className="axis-item"><span className="axis-dot green" /> Y  Depth 0–1000m</div>
-        <div className="axis-item"><span className="axis-dot blue" /> Z  Lat 0–30°N</div>
+      {/* Bottom-Left: Coordinate Legend */}
+      <div className="hud-panel hud-coordinate-legend">
+        <div className="coord-grid mono">
+          <div className="coord-row">
+            <span className="coord-axis coord-x">X</span>
+            <span className="coord-name">Longitude</span>
+            <span className="coord-bounds">55–100°E</span>
+          </div>
+          <div className="coord-row">
+            <span className="coord-axis coord-y">Y</span>
+            <span className="coord-name">Depth</span>
+            <span className="coord-bounds">0–1000m</span>
+          </div>
+          <div className="coord-row">
+            <span className="coord-axis coord-z">Z</span>
+            <span className="coord-name">Latitude</span>
+            <span className="coord-bounds">0–30°N</span>
+          </div>
+        </div>
       </div>
     </div>
   );

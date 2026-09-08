@@ -1,22 +1,19 @@
 import React from 'react';
 import { useOceanStore } from '../../store/oceanStore';
 import { COLOR_PALETTES, createCssGradient } from '../../utils/colorScales';
-import { Palette } from 'lucide-react';
 
 export const ColorScaleControl: React.FC = () => {
-  const {
-    colorScale,
-    colorMin,
-    colorMax,
-    scaleType,
-    setColorScale,
-    setColorRange,
-    setScaleType,
-    selectedVariable,
-    dataset,
-  } = useOceanStore();
+  const colorScale = useOceanStore((s) => s.colorScale);
+  const colorMin = useOceanStore((s) => s.colorMin);
+  const colorMax = useOceanStore((s) => s.colorMax);
+  const scaleType = useOceanStore((s) => s.scaleType);
+  const setColorScale = useOceanStore((s) => s.setColorScale);
+  const setColorRange = useOceanStore((s) => s.setColorRange);
+  const setScaleType = useOceanStore((s) => s.setScaleType);
+  const selectedVariable = useOceanStore((s) => s.selectedVariable);
+  const dataset = useOceanStore((s) => s.dataset);
 
-  const varMeta = dataset?.variables[selectedVariable];
+  const varMeta = dataset?.variables?.[selectedVariable];
   const unit = varMeta?.units || '';
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,92 +31,91 @@ export const ColorScaleControl: React.FC = () => {
   };
 
   return (
-    <div className="control-section">
-      <div className="section-header">
-        <div className="section-title">
-          <Palette size={15} className="text-amber" />
-          <span>Color Scale & Palette</span>
-        </div>
-      </div>
-
+    <div className="colorscale-container">
       {/* Active Gradient Bar */}
-      <div className="colormap-preview-box">
+      <div className="colormap-active-display">
         <div
-          className="colormap-gradient-bar"
+          className="colormap-preview-gradient"
           style={{ background: createCssGradient(colorScale) }}
         />
-        <div className="colormap-range-labels">
-          <span className="mono">{colorMin.toFixed(2)} {unit}</span>
-          <span className="colormap-name">{COLOR_PALETTES[colorScale]?.name || colorScale}</span>
-          <span className="mono">{colorMax.toFixed(2)} {unit}</span>
+        <div className="colormap-range-bounds mono">
+          <span>{colorMin.toFixed(1)} {unit}</span>
+          <span className="palette-active-name">{COLOR_PALETTES[colorScale]?.name || colorScale}</span>
+          <span>{colorMax.toFixed(1)} {unit}</span>
         </div>
       </div>
 
-      {/* Palette Grid */}
-      <div className="palette-grid">
-        {Object.entries(COLOR_PALETTES).map(([id, palette]) => (
-          <button
-            key={id}
-            id={`palette-btn-${id}`}
-            className={`palette-chip ${colorScale === id ? 'selected' : ''}`}
-            onClick={() => setColorScale(id)}
-          >
-            <div
-              className="palette-preview-strip"
-              style={{ background: `linear-gradient(to right, ${palette.stops.join(', ')})` }}
-            />
-            <span className="palette-label">{palette.name.split(' ')[0]}</span>
-          </button>
-        ))}
+      {/* Palette Selection Grid */}
+      <div className="section-header-compact">
+        <span className="section-title-label">PALETTES</span>
+      </div>
+      <div className="palette-chip-grid">
+        {Object.entries(COLOR_PALETTES).map(([id, palette]) => {
+          const isSelected = colorScale === id;
+          return (
+            <button
+              key={id}
+              id={`palette-btn-${id}`}
+              className={`palette-choice-chip ${isSelected ? 'selected' : ''}`}
+              onClick={() => setColorScale(id)}
+            >
+              <div
+                className="palette-swatch-bar"
+                style={{ background: `linear-gradient(to right, ${palette.stops.join(', ')})` }}
+              />
+              <span className="palette-chip-name">{palette.name.split(' ')[0]}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Min / Max Inputs and Scale Type Toggle */}
-      <div className="range-controls-row">
-        <div className="input-group">
-          <label className="input-label">Min ({unit}):</label>
+      {/* Min / Max Range Controls */}
+      <div className="section-header-compact" style={{ marginTop: '16px' }}>
+        <span className="section-title-label">VALUE RANGE</span>
+      </div>
+      <div className="range-input-row">
+        <div className="range-input-col">
+          <label className="input-field-label">Min ({unit})</label>
           <input
             type="number"
             value={colorMin}
-            step="0.1"
+            step="0.5"
             onChange={handleMinChange}
-            className="numeric-input mono"
+            className="text-input mono"
             id="input-color-min"
           />
         </div>
 
-        <div className="input-group">
-          <label className="input-label">Max ({unit}):</label>
+        <div className="range-input-col">
+          <label className="input-field-label">Max ({unit})</label>
           <input
             type="number"
             value={colorMax}
-            step="0.1"
+            step="0.5"
             onChange={handleMaxChange}
-            className="numeric-input mono"
+            className="text-input mono"
             id="input-color-max"
           />
         </div>
+      </div>
 
-        <div className="scale-type-toggle">
-          <label className="input-label">Scale:</label>
-          <div className="toggle-button-group">
-            <button
-              className={`toggle-btn ${scaleType === 'linear' ? 'active' : ''}`}
-              onClick={() => setScaleType('linear')}
-              title="Linear Colormap Scale"
-              id="btn-scale-linear"
-            >
-              Lin
-            </button>
-            <button
-              className={`toggle-btn ${scaleType === 'log' ? 'active' : ''}`}
-              onClick={() => setScaleType('log')}
-              title="Logarithmic Colormap Scale"
-              id="btn-scale-log"
-            >
-              Log
-            </button>
-          </div>
-        </div>
+      {/* Scale Type Segmented Toggle */}
+      <div className="section-header-compact" style={{ marginTop: '16px' }}>
+        <span className="section-title-label">SCALING</span>
+      </div>
+      <div className="scale-toggle-control">
+        <button
+          className={`scale-toggle-btn ${scaleType === 'linear' ? 'active' : ''}`}
+          onClick={() => setScaleType('linear')}
+        >
+          Linear
+        </button>
+        <button
+          className={`scale-toggle-btn ${scaleType === 'log' ? 'active' : ''}`}
+          onClick={() => setScaleType('log')}
+        >
+          Logarithmic
+        </button>
       </div>
     </div>
   );

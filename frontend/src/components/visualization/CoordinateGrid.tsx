@@ -53,10 +53,10 @@ const CoordinateGridComponent: React.FC = () => {
       <mesh position={[0, -boxHeight / 2, 0]}>
         <boxGeometry args={[boxWidth, boxHeight, boxDepth]} />
         <meshBasicMaterial
-          color="#3b82f6"
+          color="#52525b"
           wireframe
           transparent
-          opacity={0.12}
+          opacity={0.25}
           depthWrite={false}
         />
       </mesh>
@@ -65,10 +65,10 @@ const CoordinateGridComponent: React.FC = () => {
       <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[boxWidth, boxDepth]} />
         <meshBasicMaterial
-          color="#3b82f6"
+          color="#52525b"
           wireframe
           transparent
-          opacity={0.10}
+          opacity={0.18}
           depthWrite={false}
         />
       </mesh>
@@ -78,7 +78,7 @@ const CoordinateGridComponent: React.FC = () => {
         <mesh position={[0, -boxHeight, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[boxWidth, boxDepth, 16, 16]} />
           <meshBasicMaterial
-            color="#091b29"
+            color="#18181b"
             depthWrite={false}
           />
         </mesh>
@@ -91,13 +91,13 @@ const CoordinateGridComponent: React.FC = () => {
         return (
           <group key={normDepth}>
             <lineSegments geometry={edgeGeo} position={[0, y, 0]}>
-              <lineBasicMaterial color="#3b82f6" transparent opacity={0.12} depthWrite={false} />
+              <lineBasicMaterial color="#52525b" transparent opacity={0.22} depthWrite={false} />
             </lineSegments>
 
             <Text
               position={[-boxWidth / 2 - 0.6, y, boxDepth / 2]}
               fontSize={0.4}
-              color="#94a3b8"
+              color="#a1a1aa"
               anchorX="right"
               anchorY="middle"
             >
@@ -111,7 +111,7 @@ const CoordinateGridComponent: React.FC = () => {
       <Text
         position={[-boxWidth / 2 - 0.6, 0, boxDepth / 2]}
         fontSize={0.4}
-        color="#94a3b8"
+        color="#a1a1aa"
         anchorX="right"
         anchorY="middle"
       >
@@ -124,7 +124,7 @@ const CoordinateGridComponent: React.FC = () => {
           key={`lon-${lon}`}
           position={[lonToX(lon), 0.15, boxDepth / 2 + 0.5]}
           fontSize={0.25}
-          color="#94a3b8"
+          color="#a1a1aa"
           anchorX="center"
           anchorY="middle"
         >
@@ -138,7 +138,7 @@ const CoordinateGridComponent: React.FC = () => {
           key={`lat-${lat}`}
           position={[boxWidth / 2 + 0.5, 0.15, latToZ(lat)]}
           fontSize={0.25}
-          color="#94a3b8"
+          color="#a1a1aa"
           anchorX="left"
           anchorY="middle"
         >

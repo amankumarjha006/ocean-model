@@ -127,12 +127,12 @@ export const OceanViewport: React.FC = () => {
           preserveDrawingBuffer: false,
         }}
       >
-        <color attach="background" args={['#040A15']} />
+        <color attach="background" args={['#0B0C0E']} />
 
         {/* Ambient & directional light */}
-        <ambientLight intensity={0.7} color="#dce8f5" />
+        <ambientLight intensity={0.75} color="#f4f4f5" />
         <directionalLight position={[15, 25, 15]} intensity={1.0} color="#ffffff" />
-        <directionalLight position={[-12, -10, -12]} intensity={0.3} color="#0369a1" />
+        <directionalLight position={[-12, -10, -12]} intensity={0.25} color="#3f3f46" />
 
         {/* Camera and Dynamic Preset Animation */}
         <PerspectiveCamera makeDefault position={[14, 20, 22]} fov={45} near={0.1} far={200} />
@@ -155,9 +155,9 @@ export const OceanViewport: React.FC = () => {
           <mesh position={[0, 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
             <planeGeometry args={[20, 12]} />
             <meshBasicMaterial
-              color="#0c6478"
+              color="#3f3f46"
               transparent
-              opacity={0.15}
+              opacity={0.12}
               side={THREE.DoubleSide}
               depthWrite={false}
             />

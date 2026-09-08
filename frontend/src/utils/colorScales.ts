@@ -2,38 +2,38 @@ import { ColorPalette, ScaleType } from '../types/ocean';
 
 /**
  * Standard Oceanographic & Scientific Color Palettes
- * (Thermal/Inferno, Haline/Viridis, Algae/OceanBio, Velocity/CoolWarm, Speed/Plasma, DeepOcean)
+ * Formulated with professional oceanographic tones (Zero indigo or violet).
  */
 export const COLOR_PALETTES: Record<string, ColorPalette> = {
   thermal: {
     id: 'thermal',
     name: 'Thermal (Temperature)',
     category: 'oceanographic',
-    stops: ['#03071e', '#370617', '#6a040f', '#9d0208', '#d00000', '#dc2f02', '#e85d04', '#f48c06', '#faa307', '#ffba08'],
+    stops: ['#0f1d38', '#143865', '#126180', '#0d857b', '#26a96c', '#72c153', '#c6d63c', '#f59e0b', '#ea580c', '#dc2626'],
   },
   haline: {
     id: 'haline',
     name: 'Haline (Salinity)',
     category: 'oceanographic',
-    stops: ['#440154', '#482878', '#3e4989', '#31688e', '#26828e', '#1f9e89', '#35b779', '#6ece58', '#b5de2b', '#fde725'],
+    stops: ['#082f49', '#0369a1', '#0891b2', '#0d9488', '#10b981', '#84cc16', '#eab308', '#d97706'],
   },
   algae: {
     id: 'algae',
     name: 'Algae (Chlorophyll)',
     category: 'oceanographic',
-    stops: ['#081c15', '#1b4332', '#2d6a4f', '#40916c', '#52b788', '#74c69d', '#95d5b2', '#b7e4c7', '#d8f3dc', '#f1faee'],
+    stops: ['#022c22', '#064e3b', '#047857', '#059669', '#10b981', '#34d399', '#6ee7b7', '#fef08a'],
   },
   coolwarm: {
     id: 'coolwarm',
     name: 'Cool-Warm (Velocity / Anomaly)',
     category: 'diverging',
-    stops: ['#3b4cc0', '#688aef', '#99baff', '#c8d8f7', '#e2e2e2', '#f5c4ad', '#ea8a72', '#cb4942', '#b40426'],
+    stops: ['#0f4c81', '#2d74b2', '#589fd6', '#98c5e9', '#e8eef2', '#f19e75', '#de6245', '#bd2d2b', '#8c0e14'],
   },
   speed: {
     id: 'speed',
-    name: 'Plasma (Speed / Energy)',
+    name: 'Current Speed & Energy',
     category: 'sequential',
-    stops: ['#0d0887', '#46039f', '#7201a8', '#9c179e', '#bd3786', '#d8576b', '#ed7953', '#fb9f3a', '#fdca26', '#f0f921'],
+    stops: ['#082f49', '#0e7490', '#06b6d4', '#10b981', '#84cc16', '#f59e0b', '#ea580c', '#dc2626'],
   },
   deepocean: {
     id: 'deepocean',

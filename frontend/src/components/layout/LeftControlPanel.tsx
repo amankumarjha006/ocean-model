@@ -7,7 +7,8 @@ import { LayerToggles } from '../controls/LayerToggles';
 import { SlidersHorizontal, ChevronLeft } from 'lucide-react';
 
 export const LeftControlPanel: React.FC = () => {
-  const { sidebarOpen, toggleSidebar } = useOceanStore();
+  const sidebarOpen = useOceanStore((s) => s.sidebarOpen);
+  const toggleSidebar = useOceanStore((s) => s.toggleSidebar);
 
   if (!sidebarOpen) {
     return null;
@@ -17,26 +18,35 @@ export const LeftControlPanel: React.FC = () => {
     <aside className="left-control-panel" id="left-control-panel">
       <div className="panel-header">
         <div className="panel-title">
-          <SlidersHorizontal size={14} />
-          <span>Controls</span>
+          <SlidersHorizontal size={13} />
+          <span>CONTROLS</span>
         </div>
         <button
           className="panel-collapse-btn"
           onClick={toggleSidebar}
           title="Collapse Panel"
+          id="btn-collapse-sidebar"
         >
           <ChevronLeft size={14} />
         </button>
       </div>
 
       <div className="panel-content scrollable">
-        <ModeSelector />
-        <div className="panel-divider" />
-        <VariableSelector />
-        <div className="panel-divider" />
-        <DepthSlider />
-        <div className="panel-divider" />
-        <LayerToggles />
+        <div className="panel-section">
+          <ModeSelector />
+        </div>
+
+        <div className="panel-section">
+          <VariableSelector />
+        </div>
+
+        <div className="panel-section">
+          <DepthSlider />
+        </div>
+
+        <div className="panel-section">
+          <LayerToggles />
+        </div>
       </div>
     </aside>
   );

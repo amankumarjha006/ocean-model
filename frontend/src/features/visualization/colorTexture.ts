@@ -38,15 +38,15 @@ export const COLOR_PALETTES: Record<string, ColorStop[]> = {
     { stop: 1.0, r: 220, g: 38, b: 38 },   // Positive anomaly red
   ],
   speed: [
-    { stop: 0.0, r: 49, g: 46, b: 129 },   // Stagnant / calm deep indigo (was rgb(30,27,75))
-    { stop: 0.2, r: 6, g: 182, b: 212 },   // Light drift cyan
+    { stop: 0.0, r: 8, g: 47, b: 73 },     // Calm deep navy blue (no indigo)
+    { stop: 0.2, r: 14, g: 116, b: 144 },  // Ocean teal
     { stop: 0.45, r: 16, g: 185, b: 129 }, // Moderate current green
     { stop: 0.7, r: 245, g: 158, b: 11 },  // Energetic jet amber
     { stop: 1.0, r: 239, g: 68, b: 68 },   // Intense boundary current red
   ],
   viridis: [
-    { stop: 0.0, r: 68, g: 1, b: 84 },
-    { stop: 0.25, r: 59, g: 82, b: 139 },
+    { stop: 0.0, r: 12, g: 50, b: 75 },
+    { stop: 0.25, r: 14, g: 116, b: 144 },
     { stop: 0.5, r: 33, g: 145, b: 140 },
     { stop: 0.75, r: 94, g: 201, b: 98 },
     { stop: 1.0, r: 253, g: 231, b: 37 },

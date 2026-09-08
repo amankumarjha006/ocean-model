@@ -3,53 +3,52 @@ import { useOceanStore, VizMode } from '../../store/oceanStore';
 import { Layers, Box, Wind, Orbit } from 'lucide-react';
 
 export const ModeSelector: React.FC = () => {
-  const {
-    vizMode,
-    setVizMode,
-    isosurfaceThreshold,
-    setIsosurfaceThreshold,
-    volumeLayerCount,
-    setVolumeLayerCount,
-    volumeOpacity,
-    setVolumeOpacity,
-    currentDensity,
-    setCurrentDensity,
-    currentSpeedScale,
-    setCurrentSpeedScale,
-    colorMin,
-    colorMax,
-    dataset,
-    selectedVariable,
-  } = useOceanStore();
+  const vizMode = useOceanStore((s) => s.vizMode);
+  const setVizMode = useOceanStore((s) => s.setVizMode);
+  const isosurfaceThreshold = useOceanStore((s) => s.isosurfaceThreshold);
+  const setIsosurfaceThreshold = useOceanStore((s) => s.setIsosurfaceThreshold);
+  const volumeLayerCount = useOceanStore((s) => s.volumeLayerCount);
+  const setVolumeLayerCount = useOceanStore((s) => s.setVolumeLayerCount);
+  const volumeOpacity = useOceanStore((s) => s.volumeOpacity);
+  const setVolumeOpacity = useOceanStore((s) => s.setVolumeOpacity);
+  const currentDensity = useOceanStore((s) => s.currentDensity);
+  const setCurrentDensity = useOceanStore((s) => s.setCurrentDensity);
+  const currentSpeedScale = useOceanStore((s) => s.currentSpeedScale);
+  const setCurrentSpeedScale = useOceanStore((s) => s.setCurrentSpeedScale);
+  const colorMin = useOceanStore((s) => s.colorMin);
+  const colorMax = useOceanStore((s) => s.colorMax);
+  const dataset = useOceanStore((s) => s.dataset);
+  const selectedVariable = useOceanStore((s) => s.selectedVariable);
 
-  const varMeta = dataset?.variables[selectedVariable];
+  const varMeta = dataset?.variables?.[selectedVariable];
   const unit = varMeta?.units || '';
 
-  const modes: { id: VizMode; label: string; icon: React.ReactNode; desc: string }[] = [
-    { id: 'slice', label: 'Depth Slice', icon: <Layers size={14} />, desc: '2D Horizontal GPU DataTexture plane' },
-    { id: 'volume', label: '3D Volume', icon: <Box size={14} />, desc: 'Stacked depth slices through water column' },
-    { id: 'currents', label: 'Currents', icon: <Wind size={14} />, desc: 'Instanced 3D vector arrows & flow particles' },
-    { id: 'isosurface', label: 'Isosurface', icon: <Orbit size={14} />, desc: '3D Marching Cubes constant-value shell' },
+  const modes: { id: VizMode; label: string; icon: React.ReactNode }[] = [
+    { id: 'slice', label: 'Depth Slice', icon: <Layers size={13} /> },
+    { id: 'volume', label: '3D Volume', icon: <Box size={13} /> },
+    { id: 'currents', label: 'Currents', icon: <Wind size={13} /> },
+    { id: 'isosurface', label: 'Isosurface', icon: <Orbit size={13} /> },
   ];
 
   return (
     <div className="control-group" id="mode-selector-group">
-      <label className="control-label">
-        <span>3D Visualization Mode</span>
-        <span className="control-badge text-cyan font-bold">{vizMode.toUpperCase()}</span>
-      </label>
+      <div className="section-header-compact">
+        <span className="section-title-label">VISUALIZATION MODE</span>
+      </div>
 
-      {/* Mode Switcher Tabs */}
-      <div className="mode-tabs-grid">
+      {/* Segmented Mode Control */}
+      <div className="segmented-control" role="tablist">
         {modes.map((m) => (
           <button
             key={m.id}
-            className={`mode-tab-button ${vizMode === m.id ? 'active' : ''}`}
+            role="tab"
+            aria-selected={vizMode === m.id}
+            className={`segmented-btn ${vizMode === m.id ? 'active' : ''}`}
             onClick={() => setVizMode(m.id)}
-            title={m.desc}
+            id={`mode-btn-${m.id}`}
           >
-            <div className="mode-tab-icon">{m.icon}</div>
-            <span className="mode-tab-text">{m.label}</span>
+            <span className="segmented-icon">{m.icon}</span>
+            <span className="segmented-label">{m.label}</span>
           </button>
         ))}
       </div>
@@ -57,11 +56,11 @@ export const ModeSelector: React.FC = () => {
       {/* Mode-Specific Sub-Controls */}
       {vizMode === 'isosurface' && (
         <div className="mode-subpanel">
-          <div className="subpanel-header">
-            <span className="text-muted text-xs">Isosurface Threshold</span>
-            <strong className="mono text-amber text-xs">
+          <div className="subpanel-row">
+            <span className="control-sublabel">Threshold</span>
+            <span className="control-value mono">
               {isosurfaceThreshold.toFixed(1)} {unit}
-            </strong>
+            </span>
           </div>
           <input
             type="range"
@@ -72,9 +71,9 @@ export const ModeSelector: React.FC = () => {
             onChange={(e) => setIsosurfaceThreshold(parseFloat(e.target.value))}
             className="slider-input"
           />
-          <div className="range-labels text-xs mono text-muted">
-            <span>Min: {colorMin.toFixed(1)}</span>
-            <span>Max: {colorMax.toFixed(1)}</span>
+          <div className="range-bounds mono">
+            <span>{colorMin.toFixed(1)}</span>
+            <span>{colorMax.toFixed(1)}</span>
           </div>
         </div>
       )}
@@ -82,8 +81,8 @@ export const ModeSelector: React.FC = () => {
       {vizMode === 'volume' && (
         <div className="mode-subpanel">
           <div className="subpanel-row">
-            <span className="text-muted text-xs">Volume Strata Layers</span>
-            <strong className="mono text-cyan text-xs">{volumeLayerCount} layers</strong>
+            <span className="control-sublabel">Strata Layers</span>
+            <span className="control-value mono">{volumeLayerCount}</span>
           </div>
           <input
             type="range"
@@ -95,9 +94,9 @@ export const ModeSelector: React.FC = () => {
             className="slider-input"
           />
 
-          <div className="subpanel-row" style={{ marginTop: '8px' }}>
-            <span className="text-muted text-xs">Layer Opacity</span>
-            <strong className="mono text-teal text-xs">{Math.round(volumeOpacity * 100)}%</strong>
+          <div className="subpanel-row" style={{ marginTop: '10px' }}>
+            <span className="control-sublabel">Layer Opacity</span>
+            <span className="control-value mono">{Math.round(volumeOpacity * 100)}%</span>
           </div>
           <input
             type="range"
@@ -114,24 +113,24 @@ export const ModeSelector: React.FC = () => {
       {vizMode === 'currents' && (
         <div className="mode-subpanel">
           <div className="subpanel-row">
-            <span className="text-muted text-xs">Vector Density</span>
-            <strong className="mono text-cyan text-xs">
-              {currentDensity === 1 ? 'Fine (High)' : currentDensity === 2 ? 'Medium' : 'Coarse'}
-            </strong>
+            <span className="control-sublabel">Vector Density</span>
+            <span className="control-value mono">
+              {currentDensity === 1 ? 'High' : currentDensity === 2 ? 'Medium' : 'Sparse'}
+            </span>
           </div>
           <input
             type="range"
             min={1}
-            max={3}
+            max={4}
             step={1}
             value={currentDensity}
             onChange={(e) => setCurrentDensity(parseInt(e.target.value, 10))}
             className="slider-input"
           />
 
-          <div className="subpanel-row" style={{ marginTop: '8px' }}>
-            <span className="text-muted text-xs">Arrow Speed Scaling</span>
-            <strong className="mono text-amber text-xs">{currentSpeedScale.toFixed(1)}x</strong>
+          <div className="subpanel-row" style={{ marginTop: '10px' }}>
+            <span className="control-sublabel">Speed Scale</span>
+            <span className="control-value mono">{currentSpeedScale.toFixed(1)}×</span>
           </div>
           <input
             type="range"

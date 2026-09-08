@@ -1,125 +1,83 @@
 import React from 'react';
 import { useOceanStore } from '../../store/oceanStore';
-import { Eye, Wind, Navigation, Radio, Box, Mountain, Maximize2 } from 'lucide-react';
 
 export const LayerToggles: React.FC = () => {
-  const {
-    showOceanVolume,
-    showCurrents,
-    showArgo,
-    showGliders,
-    showGrid,
-    showBathymetry,
-    verticalExaggeration,
-    toggleShowOceanVolume,
-    toggleShowCurrents,
-    toggleShowArgo,
-    toggleShowGliders,
-    toggleShowGrid,
-    toggleShowBathymetry,
-    setVerticalExaggeration,
-  } = useOceanStore();
+  const showOceanVolume = useOceanStore((s) => s.showOceanVolume);
+  const showCurrents = useOceanStore((s) => s.showCurrents);
+  const showArgo = useOceanStore((s) => s.showArgo);
+  const showGliders = useOceanStore((s) => s.showGliders);
+  const showGrid = useOceanStore((s) => s.showGrid);
+  const showBathymetry = useOceanStore((s) => s.showBathymetry);
+  const verticalExaggeration = useOceanStore((s) => s.verticalExaggeration);
+  const toggleShowOceanVolume = useOceanStore((s) => s.toggleShowOceanVolume);
+  const toggleShowCurrents = useOceanStore((s) => s.toggleShowCurrents);
+  const toggleShowArgo = useOceanStore((s) => s.toggleShowArgo);
+  const toggleShowGliders = useOceanStore((s) => s.toggleShowGliders);
+  const toggleShowGrid = useOceanStore((s) => s.toggleShowGrid);
+  const toggleShowBathymetry = useOceanStore((s) => s.toggleShowBathymetry);
+  const setVerticalExaggeration = useOceanStore((s) => s.setVerticalExaggeration);
 
   const layers = [
-    {
-      id: 'toggle-ocean-volume',
-      label: 'Ocean 3D Volume Field',
-      icon: <Box size={15} className="text-cyan" />,
-      active: showOceanVolume,
-      toggle: toggleShowOceanVolume,
-      tag: 'Field',
-    },
-    {
-      id: 'toggle-currents',
-      label: 'Ocean Current Vectors',
-      icon: <Wind size={15} className="text-blue" />,
-      active: showCurrents,
-      toggle: toggleShowCurrents,
-      tag: 'U/V/W',
-    },
-    {
-      id: 'toggle-argo',
-      label: 'Argo Profiling Floats',
-      icon: <Radio size={15} className="text-amber" />,
-      active: showArgo,
-      toggle: toggleShowArgo,
-      tag: 'Floats',
-    },
-    {
-      id: 'toggle-gliders',
-      label: 'Autonomous Gliders',
-      icon: <Navigation size={15} className="text-emerald" />,
-      active: showGliders,
-      toggle: toggleShowGliders,
-      tag: 'Traj',
-    },
-    {
-      id: 'toggle-bathymetry',
-      label: 'Seafloor Bathymetry',
-      icon: <Mountain size={15} className="text-indigo" />,
-      active: showBathymetry,
-      toggle: toggleShowBathymetry,
-      tag: 'Terrain',
-    },
-    {
-      id: 'toggle-grid',
-      label: 'Coordinate Box & Grid',
-      icon: <Maximize2 size={15} className="text-slate" />,
-      active: showGrid,
-      toggle: toggleShowGrid,
-      tag: 'Axes',
-    },
+    { id: 'toggle-ocean-volume', label: 'Volume Stack', active: showOceanVolume, toggle: toggleShowOceanVolume },
+    { id: 'toggle-currents', label: 'Current Vectors', active: showCurrents, toggle: toggleShowCurrents },
+    { id: 'toggle-argo', label: 'Argo Floats', active: showArgo, toggle: toggleShowArgo },
+    { id: 'toggle-gliders', label: 'Autonomous Gliders', active: showGliders, toggle: toggleShowGliders },
+    { id: 'toggle-bathymetry', label: 'Seafloor Bathymetry', active: showBathymetry, toggle: toggleShowBathymetry },
+    { id: 'toggle-grid', label: 'Coordinate Grid & Box', active: showGrid, toggle: toggleShowGrid },
   ];
 
   return (
-    <div className="control-section">
-      <div className="section-header">
-        <div className="section-title">
-          <Eye size={15} className="text-cyan" />
-          <span>Visualization Layers</span>
-        </div>
+    <div className="control-group" id="layer-toggles-group">
+      <div className="section-header-compact">
+        <span className="section-title-label">LAYERS</span>
       </div>
 
-      <div className="layer-list">
+      <div className="layer-toggle-list">
         {layers.map((layer) => (
-          <button
+          <div
             key={layer.id}
             id={layer.id}
-            className={`layer-item ${layer.active ? 'active' : ''}`}
+            className="layer-toggle-row"
             onClick={layer.toggle}
+            role="switch"
+            aria-checked={layer.active}
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                layer.toggle();
+              }
+            }}
           >
-            <div className="layer-info">
-              {layer.icon}
-              <span className="layer-label">{layer.label}</span>
+            <span className="layer-row-label">{layer.label}</span>
+            <div className={`switch-control ${layer.active ? 'on' : 'off'}`}>
+              <div className="switch-thumb" />
             </div>
-            <div className="layer-status">
-              <span className="layer-tag">{layer.tag}</span>
-              {layer.active ? (
-                <span className="toggle-switch on"><span className="toggle-thumb" /></span>
-              ) : (
-                <span className="toggle-switch off"><span className="toggle-thumb" /></span>
-              )}
-            </div>
-          </button>
+          </div>
         ))}
       </div>
 
-      {/* Vertical Exaggeration Slider */}
-      <div className="sub-control">
-        <div className="sub-header">
-          <span className="sub-label">Vertical Exaggeration (Z-Scale):</span>
-          <span className="sub-value text-cyan mono">{verticalExaggeration}x</span>
+      <div className="vertical-exaggeration-control">
+        <div className="subpanel-row">
+          <span className="control-sublabel">Vertical Exaggeration</span>
+          <span className="control-value mono">{verticalExaggeration.toFixed(1)}×</span>
         </div>
         <input
           type="range"
-          min="1"
-          max="20"
+          min="1.0"
+          max="10.0"
           step="0.5"
           value={verticalExaggeration}
           onChange={(e) => setVerticalExaggeration(parseFloat(e.target.value))}
-          className="depth-range-input"
+          className="slider-input"
           id="vertical-exaggeration-slider"
+          aria-label="Vertical exaggeration slider"
         />
+        <div className="range-bounds mono">
+          <span>1.0×</span>
+          <span>5.0×</span>
+          <span>10.0×</span>
+        </div>
       </div>
     </div>
   );

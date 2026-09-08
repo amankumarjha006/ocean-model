@@ -1,40 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOceanStore } from '../../store/oceanStore';
-import { Waves, Activity, RotateCcw, PanelLeft, PanelRight } from 'lucide-react';
+import { PanelLeft, PanelRight, Clock } from 'lucide-react';
 
 export const Header: React.FC = () => {
-  const {
-    dataset,
-    backendOnline,
-    selectedVariable,
-    selectedDepth,
-    selectedTimeIndex,
-    selectedScenario,
-    setSelectedScenario,
-    sidebarOpen,
-    inspectorOpen,
-    toggleSidebar,
-    toggleInspector,
-    resetView,
-  } = useOceanStore();
+  const dataset = useOceanStore((s) => s.dataset);
+  const selectedVariable = useOceanStore((s) => s.selectedVariable);
+  const selectedDepth = useOceanStore((s) => s.selectedDepth);
+  const selectedScenario = useOceanStore((s) => s.selectedScenario);
+  const setSelectedScenario = useOceanStore((s) => s.setSelectedScenario);
+  const sidebarOpen = useOceanStore((s) => s.sidebarOpen);
+  const inspectorOpen = useOceanStore((s) => s.inspectorOpen);
+  const toggleSidebar = useOceanStore((s) => s.toggleSidebar);
+  const toggleInspector = useOceanStore((s) => s.toggleInspector);
 
-  const currentTime = dataset?.coordinates.time.values[selectedTimeIndex] ?? '2026-09-01T00:00:00Z';
-  const formattedDate = new Date(currentTime).toLocaleDateString('en-US', {
+  // Real-time live date & time ticker (updates every second)
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDate(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const liveDateStr = currentDate.toLocaleDateString('en-GB', {
+    day: '2-digit',
     month: 'short',
-    day: 'numeric',
     year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
     timeZone: 'UTC',
   });
 
-  const varMeta = dataset?.variables[selectedVariable];
+  const liveTimeStr = currentDate.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  });
+
+  const varMeta = dataset?.variables?.[selectedVariable];
+  const varLabel = varMeta?.display_name || selectedVariable;
 
   return (
     <header className="ocean-header">
+      {/* Left: Branding & Panel Toggle */}
       <div className="header-left">
         <button
-          className={`icon-btn ${sidebarOpen ? 'active' : ''}`}
+          className={`header-icon-btn ${sidebarOpen ? 'active' : ''}`}
           onClick={toggleSidebar}
           title="Toggle Controls Sidebar"
           id="btn-toggle-sidebar"
@@ -43,29 +55,25 @@ export const Header: React.FC = () => {
         </button>
 
         <div className="brand-lockup">
-          <div className="brand-logo">
-            <Waves size={20} />
+          <div className="brand-main-row">
+            <span className="brand-title">OCEAN-3D</span>
+            <span className="sih-tag">SIH 2026</span>
           </div>
-          <div className="brand-text">
-            <div className="brand-title">
-              <span className="brand-title-accent">OCEAN</span>-3D
-              <span className="prototype-badge">SIH 2026</span>
-            </div>
-            <div className="brand-subtitle">
-              INCOIS Ocean Data System
-            </div>
-          </div>
+          <span className="brand-subtitle">INCOIS Ocean Data System</span>
         </div>
       </div>
 
+      {/* Center: Clean Non-wrapping Metadata Groups with generous spacing */}
       <div className="header-center">
-        <div className="telemetry-chip">
-          <span className="chip-label">Domain</span>
-          <span className="chip-value mono" style={{ fontSize: '10px' }}>Indian Ocean 0–30°N, 55–100°E</span>
+        <div className="header-meta-group">
+          <span className="meta-label">Domain</span>
+          <span className="meta-value mono" title="0–30°N · 55–100°E">Indian Ocean</span>
         </div>
 
-        <div className="telemetry-chip">
-          <span className="chip-label">Scenario</span>
+        <span className="meta-divider" />
+
+        <div className="header-meta-group">
+          <span className="meta-label">Scenario</span>
           <select
             value={selectedScenario}
             onChange={(e) => setSelectedScenario(e.target.value)}
@@ -79,43 +87,34 @@ export const Header: React.FC = () => {
           </select>
         </div>
 
-        <div className="telemetry-chip">
-          <span className="chip-label">Var</span>
-          <span className="chip-value highlight">{varMeta?.display_name || selectedVariable}</span>
+        <span className="meta-divider" />
+
+        <div className="header-meta-group">
+          <span className="meta-label">Variable</span>
+          <span className="meta-value highlight variable-header-val" title={varLabel}>{varLabel}</span>
         </div>
 
-        <div className="telemetry-chip">
-          <span className="chip-label">Depth</span>
-          <span className="chip-value mono" style={{ color: 'var(--accent-teal-bright)' }}>
-            {selectedDepth === 0 ? '0 m' : `−${selectedDepth} m`}
+        <span className="meta-divider" />
+
+        <div className="header-meta-group">
+          <span className="meta-label">Depth</span>
+          <span className="meta-value mono depth-chip">
+            {selectedDepth === 0 ? '0.0 m (Surface)' : `−${selectedDepth.toFixed(1)} m`}
           </span>
-        </div>
-
-        <div className="telemetry-chip">
-          <span className="chip-label">UTC</span>
-          <span className="chip-value mono">{formattedDate}</span>
         </div>
       </div>
 
+      {/* Right: Live Real-Time Date & Time Clock + Inspector Toggle */}
       <div className="header-right">
-        <div className={`status-pill ${backendOnline ? 'online' : 'offline'}`} id="backend-status-pill">
-          <span className="pulse-dot"></span>
-          <Activity size={11} />
-          <span>{backendOnline ? 'ONLINE' : 'OFFLINE'}</span>
+        <div className="live-clock-badge mono" title="Live Real-Time UTC Clock">
+          <Clock size={13} className="clock-icon" />
+          <span className="live-date">{liveDateStr}</span>
+          <span className="live-time-divider">·</span>
+          <span className="live-time">{liveTimeStr} UTC</span>
         </div>
 
         <button
-          className="btn-reset"
-          onClick={resetView}
-          title="Reset Camera & Viewport"
-          id="btn-reset-view"
-        >
-          <RotateCcw size={13} />
-          <span>Reset</span>
-        </button>
-
-        <button
-          className={`icon-btn ${inspectorOpen ? 'active' : ''}`}
+          className={`header-icon-btn ${inspectorOpen ? 'active' : ''}`}
           onClick={toggleInspector}
           title="Toggle Metadata Inspector"
           id="btn-toggle-inspector"

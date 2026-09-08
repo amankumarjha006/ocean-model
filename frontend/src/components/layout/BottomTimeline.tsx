@@ -1,26 +1,17 @@
 import React, { useEffect } from 'react';
 import { useOceanStore } from '../../store/oceanStore';
-import {
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Clock,
-  Calendar,
-} from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
 
 export const BottomTimeline: React.FC = () => {
-  const {
-    dataset,
-    selectedTimeIndex,
-    setSelectedTimeIndex,
-    isPlaying,
-    togglePlayback,
-    stepTime,
-    playbackSpeedMs,
-  } = useOceanStore();
+  const dataset = useOceanStore((s) => s.dataset);
+  const selectedTimeIndex = useOceanStore((s) => s.selectedTimeIndex);
+  const setSelectedTimeIndex = useOceanStore((s) => s.setSelectedTimeIndex);
+  const isPlaying = useOceanStore((s) => s.isPlaying);
+  const togglePlayback = useOceanStore((s) => s.togglePlayback);
+  const stepTime = useOceanStore((s) => s.stepTime);
+  const playbackSpeedMs = useOceanStore((s) => s.playbackSpeedMs);
 
-  const timeValues = dataset?.coordinates.time.values || [
+  const timeValues = dataset?.coordinates?.time?.values || [
     '2026-09-01T00:00:00Z',
     '2026-09-01T06:00:00Z',
     '2026-09-01T12:00:00Z',
@@ -29,10 +20,11 @@ export const BottomTimeline: React.FC = () => {
     '2026-09-02T06:00:00Z',
     '2026-09-02T12:00:00Z',
     '2026-09-02T18:00:00Z',
+    '2026-09-03T00:00:00Z',
+    '2026-09-03T06:00:00Z',
   ];
   const totalSteps = timeValues.length;
 
-  // Auto-playback loop
   useEffect(() => {
     if (!isPlaying) return;
     const interval = setInterval(() => {
@@ -46,9 +38,8 @@ export const BottomTimeline: React.FC = () => {
   const dateObj = new Date(currentTimeStr);
 
   const formattedDate = dateObj.toLocaleDateString('en-US', {
-    weekday: 'short',
+    day: '2-digit',
     month: 'short',
-    day: 'numeric',
     year: 'numeric',
     timeZone: 'UTC',
   });
@@ -56,85 +47,82 @@ export const BottomTimeline: React.FC = () => {
   const formattedTime = dateObj.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit',
     hour12: false,
     timeZone: 'UTC',
   });
 
   return (
     <footer className="ocean-timeline-bar" id="ocean-timeline-bar">
-      <div className="timeline-left-controls">
+      {/* Left: Transport Playback Controls */}
+      <div className="timeline-left">
         <button
-          className="btn-playback-step"
+          className="btn-transport"
           onClick={() => stepTime(-1)}
           title="Previous Time Step (6h)"
           id="btn-timeline-step-back"
+          aria-label="Previous time step"
         >
-          <SkipBack size={15} />
+          <SkipBack size={14} />
         </button>
 
         <button
-          className={`btn-playback-play ${isPlaying ? 'playing' : ''}`}
+          className={`btn-transport-play ${isPlaying ? 'playing' : ''}`}
           onClick={togglePlayback}
-          title={isPlaying ? 'Pause Simulation' : 'Play 4D Time Series'}
+          title={isPlaying ? 'Pause Simulation' : 'Play Simulation'}
           id="btn-timeline-play-pause"
+          aria-label={isPlaying ? 'Pause' : 'Play'}
         >
-          {isPlaying ? <Pause size={17} /> : <Play size={17} className="ml-1" />}
+          {isPlaying ? <Pause size={14} /> : <Play size={14} />}
         </button>
 
         <button
-          className="btn-playback-step"
+          className="btn-transport"
           onClick={() => stepTime(1)}
           title="Next Time Step (6h)"
           id="btn-timeline-step-forward"
+          aria-label="Next time step"
         >
-          <SkipForward size={15} />
+          <SkipForward size={14} />
         </button>
 
-        <div className="timeline-time-display">
-          <Calendar size={13} className="text-cyan inline-icon" />
-          <span className="time-date">{formattedDate}</span>
-          <span className="time-sep">&bull;</span>
-          <Clock size={13} className="text-teal inline-icon" />
-          <span className="time-clock mono">{formattedTime} UTC</span>
+        <div className="timeline-timestamp mono">
+          <span className="timestamp-date">{formattedDate}</span>
+          <span className="timestamp-time">{formattedTime} UTC</span>
         </div>
       </div>
 
-      {/* Scrubber Area */}
-      <div className="timeline-scrubber-container">
-        <input
-          type="range"
-          min="0"
-          max={totalSteps - 1}
-          value={selectedTimeIndex}
-          onChange={(e) => setSelectedTimeIndex(parseInt(e.target.value, 10))}
-          className="timeline-slider-input"
-          id="timeline-scrubber"
-        />
-        <div className="timeline-steps-indicator">
-          {timeValues.map((t, idx) => {
-            const stepDate = new Date(t);
-            const hour = stepDate.getUTCHours();
-            const isDayStart = hour === 0;
-            return (
+      {/* Center: Thin Timeline Scrubber Track */}
+      <div className="timeline-center">
+        <div className="timeline-slider-wrap">
+          <input
+            type="range"
+            min={0}
+            max={totalSteps - 1}
+            value={selectedTimeIndex}
+            onChange={(e) => setSelectedTimeIndex(parseInt(e.target.value, 10))}
+            className="timeline-slider"
+            id="timeline-slider-input"
+            aria-label="Simulation time scrubber"
+          />
+          <div className="timeline-tick-marks">
+            {timeValues.map((t, idx) => (
               <div
                 key={t}
-                className={`step-tick ${idx === selectedTimeIndex ? 'active' : ''} ${isDayStart ? 'major' : ''}`}
+                className={`timeline-tick ${idx === selectedTimeIndex ? 'active' : ''}`}
                 onClick={() => setSelectedTimeIndex(idx)}
-                title={`${t} (Step ${idx + 1}/${totalSteps})`}
-              >
-                {isDayStart && <span className="step-tick-label">{stepDate.getUTCDate()}d</span>}
-              </div>
-            );
-          })}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="timeline-right-info">
-        <span className="step-counter mono">
-          Step <strong>{selectedTimeIndex + 1}</strong> / {totalSteps}
+      {/* Right: Step & Frequency Metadata */}
+      <div className="timeline-right mono">
+        <span className="timeline-meta-item">
+          Step <strong className="text-primary">{selectedTimeIndex + 1}</strong> / {totalSteps}
         </span>
-        <span className="resolution-badge">Δt = 6h</span>
+        <span className="timeline-meta-divider">·</span>
+        <span className="timeline-meta-item text-secondary">Δt 6h</span>
       </div>
     </footer>
   );
