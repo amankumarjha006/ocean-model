@@ -76,7 +76,9 @@ export const CoordinateGrid: React.FC = () => {
 
       {/* Depth level indicator lines + labels */}
       {depthLevels.map(({ normDepth, depthM }) => {
-        const y = (normDepth / 5.0) * boxHeight;
+        // Note: normDepth is already scaled properly so we just multiply by active box height
+        // Since Y mapping is y = -(depth / maxDepth) * activeBoxHeight
+        const y = normDepth * boxHeight;
         if (Math.abs(y) > boxHeight) return null;
         return (
           <group key={normDepth}>
@@ -88,8 +90,8 @@ export const CoordinateGrid: React.FC = () => {
             </lineSegments>
             {/* Depth tick label at left edge, billboarded */}
             <Text
-              position={[-boxWidth / 2 - 0.5, y, boxDepth / 2]}
-              fontSize={0.3}
+              position={[-boxWidth / 2 - 0.6, y, boxDepth / 2]}
+              fontSize={0.4}
               color="#94a3b8"
               anchorX="right"
               anchorY="middle"
@@ -103,8 +105,8 @@ export const CoordinateGrid: React.FC = () => {
 
       {/* Surface depth label (0m) */}
       <Text
-        position={[-boxWidth / 2 - 0.5, 0, boxDepth / 2]}
-        fontSize={0.3}
+        position={[-boxWidth / 2 - 0.6, 0, boxDepth / 2]}
+        fontSize={0.4}
         color="#94a3b8"
         anchorX="right"
         anchorY="middle"
