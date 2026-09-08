@@ -14,20 +14,18 @@ import { useOceanStore } from '../../store/oceanStore';
 import { fetchSlice, fetchVolume } from '../../services/api';
 
 export const OceanViewport: React.FC = () => {
-  const {
-    vizMode,
-    selectedVariable,
-    selectedTimeIndex,
-    selectedDepth,
-    selectedScenario,
-    volumeLayerCount,
-    showCurrents,
-    setCurrentSlice,
-    setVolumeData,
-    setUSlice,
-    setVSlice,
-    dataset,
-  } = useOceanStore();
+  const vizMode = useOceanStore((s) => s.vizMode);
+  const selectedVariable = useOceanStore((s) => s.selectedVariable);
+  const selectedTimeIndex = useOceanStore((s) => s.selectedTimeIndex);
+  const selectedDepth = useOceanStore((s) => s.selectedDepth);
+  const selectedScenario = useOceanStore((s) => s.selectedScenario);
+  const volumeLayerCount = useOceanStore((s) => s.volumeLayerCount);
+  const showCurrents = useOceanStore((s) => s.showCurrents);
+  const setCurrentSlice = useOceanStore((s) => s.setCurrentSlice);
+  const setVolumeData = useOceanStore((s) => s.setVolumeData);
+  const setUSlice = useOceanStore((s) => s.setUSlice);
+  const setVSlice = useOceanStore((s) => s.setVSlice);
+  const dataset = useOceanStore((s) => s.dataset);
 
   // Determine active depth index
   const depthValues = dataset?.coordinates?.depth?.values || [0];

@@ -10,21 +10,19 @@ interface VolumeStackMeshProps {
   maxDepthMeters?: number;
 }
 
-export const VolumeStackMesh: React.FC<VolumeStackMeshProps> = ({
+const VolumeStackMeshComponent: React.FC<VolumeStackMeshProps> = ({
   boxWidth = 20,
   boxDepth = 12,
   boxHeight = 6,
   maxDepthMeters = 1000,
 }) => {
-  const {
-    volumeData,
-    verticalExaggeration,
-    colorScale,
-    colorMin,
-    colorMax,
-    scaleType,
-    volumeOpacity,
-  } = useOceanStore();
+  const volumeData = useOceanStore((s) => s.volumeData);
+  const verticalExaggeration = useOceanStore((s) => s.verticalExaggeration);
+  const colorScale = useOceanStore((s) => s.colorScale);
+  const colorMin = useOceanStore((s) => s.colorMin);
+  const colorMax = useOceanStore((s) => s.colorMax);
+  const scaleType = useOceanStore((s) => s.scaleType);
+  const volumeOpacity = useOceanStore((s) => s.volumeOpacity);
 
   const activeBoxHeight = boxHeight * (verticalExaggeration / 5);
   const clampedOpacity = Math.max(0.20, Math.min(0.80, volumeOpacity));
@@ -63,7 +61,6 @@ export const VolumeStackMesh: React.FC<VolumeStackMeshProps> = ({
     const totalLayers = textures.length;
     return textures.map((tex, idx) => {
       const depthM = volumeData.depths[idx] ?? 0;
-      // Micro offset to prevent z-fighting between adjacent transparent planes
       const yPos = -(depthM / maxDepthMeters) * activeBoxHeight - idx * 0.001;
 
       const depthFraction = idx / Math.max(1, totalLayers - 1);
@@ -108,3 +105,5 @@ export const VolumeStackMesh: React.FC<VolumeStackMeshProps> = ({
     </group>
   );
 };
+
+export const VolumeStackMesh = React.memo(VolumeStackMeshComponent);

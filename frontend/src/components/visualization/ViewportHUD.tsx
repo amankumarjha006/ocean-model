@@ -3,23 +3,63 @@ import { useOceanStore } from '../../store/oceanStore';
 import { createCssGradient } from '../../utils/colorScales';
 import { Compass, Eye, Layers, Crosshair } from 'lucide-react';
 
+const HoverInspectionTooltip: React.FC = () => {
+  const hoveredPoint = useOceanStore((s) => s.hoveredPoint);
+  if (!hoveredPoint) return null;
+
+  return (
+    <div
+      className="hud-card hud-inspection-tooltip"
+      style={{
+        position: 'fixed',
+        left: `${Math.min(window.innerWidth - 240, hoveredPoint.x + 16)}px`,
+        top: `${Math.min(window.innerHeight - 150, hoveredPoint.y - 40)}px`,
+        pointerEvents: 'none',
+        zIndex: 9999,
+      }}
+    >
+      <div className="tooltip-header">
+        <Crosshair size={11} />
+        <span className="tooltip-title">Inspection</span>
+      </div>
+      <div className="tooltip-body mono">
+        <div className="tooltip-row">
+          <span style={{ color: 'var(--text-dim)' }}>Position</span>
+          <span>{hoveredPoint.lat.toFixed(2)}°N, {hoveredPoint.lon.toFixed(2)}°E</span>
+        </div>
+        <div className="tooltip-row">
+          <span style={{ color: 'var(--text-dim)' }}>Depth</span>
+          <span style={{ color: 'var(--accent-teal-bright)' }}>−{hoveredPoint.depth} m</span>
+        </div>
+        <div className="tooltip-row highlight-row">
+          <span style={{ color: 'var(--text-secondary)' }}>{hoveredPoint.varName}</span>
+          <span>
+            <strong style={{ color: 'var(--text-primary)', fontSize: '13px' }}>
+              {hoveredPoint.val}
+            </strong>
+            {' '}
+            <span style={{ color: 'var(--text-dim)', fontSize: '10px' }}>{hoveredPoint.units}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const ViewportHUD: React.FC = () => {
-  const {
-    vizMode,
-    cameraPreset,
-    setCameraPreset,
-    selectedVariable,
-    selectedDepth,
-    colorScale,
-    colorMin,
-    colorMax,
-    scaleType,
-    dataset,
-    verticalExaggeration,
-    currentSlice,
-    selectedScenario,
-    hoveredPoint,
-  } = useOceanStore();
+  const vizMode = useOceanStore((s) => s.vizMode);
+  const cameraPreset = useOceanStore((s) => s.cameraPreset);
+  const setCameraPreset = useOceanStore((s) => s.setCameraPreset);
+  const selectedVariable = useOceanStore((s) => s.selectedVariable);
+  const selectedDepth = useOceanStore((s) => s.selectedDepth);
+  const colorScale = useOceanStore((s) => s.colorScale);
+  const colorMin = useOceanStore((s) => s.colorMin);
+  const colorMax = useOceanStore((s) => s.colorMax);
+  const scaleType = useOceanStore((s) => s.scaleType);
+  const dataset = useOceanStore((s) => s.dataset);
+  const verticalExaggeration = useOceanStore((s) => s.verticalExaggeration);
+  const currentSlice = useOceanStore((s) => s.currentSlice);
+  const selectedScenario = useOceanStore((s) => s.selectedScenario);
 
   const varMeta = dataset?.variables[selectedVariable];
   const unit = varMeta?.units || '';
@@ -98,44 +138,8 @@ export const ViewportHUD: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Scientific Hover Tooltip */}
-      {hoveredPoint && (
-        <div
-          className="hud-card hud-inspection-tooltip"
-          style={{
-            position: 'fixed',
-            left: `${Math.min(window.innerWidth - 240, hoveredPoint.x + 16)}px`,
-            top: `${Math.min(window.innerHeight - 150, hoveredPoint.y - 40)}px`,
-            pointerEvents: 'none',
-            zIndex: 9999,
-          }}
-        >
-          <div className="tooltip-header">
-            <Crosshair size={11} />
-            <span className="tooltip-title">Inspection</span>
-          </div>
-          <div className="tooltip-body mono">
-            <div className="tooltip-row">
-              <span style={{ color: 'var(--text-dim)' }}>Position</span>
-              <span>{hoveredPoint.lat.toFixed(2)}°N, {hoveredPoint.lon.toFixed(2)}°E</span>
-            </div>
-            <div className="tooltip-row">
-              <span style={{ color: 'var(--text-dim)' }}>Depth</span>
-              <span style={{ color: 'var(--accent-teal-bright)' }}>−{hoveredPoint.depth} m</span>
-            </div>
-            <div className="tooltip-row highlight-row">
-              <span style={{ color: 'var(--text-secondary)' }}>{hoveredPoint.varName}</span>
-              <span>
-                <strong style={{ color: 'var(--text-primary)', fontSize: '13px' }}>
-                  {hoveredPoint.val}
-                </strong>
-                {' '}
-                <span style={{ color: 'var(--text-dim)', fontSize: '10px' }}>{hoveredPoint.units}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Floating Scientific Hover Tooltip (Isolated component) */}
+      <HoverInspectionTooltip />
 
       {/* Floating Colorbar in Bottom-Right */}
       <div className="hud-card hud-colorbar">
@@ -154,7 +158,7 @@ export const ViewportHUD: React.FC = () => {
         </div>
       </div>
 
-      {/* Coordinate axes helper in Bottom-Left */}
+      {/* Coordinate axes legend in Bottom-Left */}
       <div className="hud-card hud-axes-legend">
         <div className="axis-item"><span className="axis-dot red" /> X  Lon 55–100°E</div>
         <div className="axis-item"><span className="axis-dot green" /> Y  Depth 0–1000m</div>

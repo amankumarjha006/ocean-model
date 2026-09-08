@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { ThreeEvent } from '@react-three/fiber';
 import { useOceanStore } from '../../store/oceanStore';
@@ -12,28 +12,26 @@ interface DepthSliceMeshProps {
   overrideOpacity?: number;
 }
 
-export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
+const DepthSliceMeshComponent: React.FC<DepthSliceMeshProps> = ({
   boxWidth = 20,
   boxDepth = 12,
   boxHeight = 6,
   maxDepthMeters = 1000,
   overrideOpacity,
 }) => {
-  const {
-    currentSlice,
-    selectedDepth,
-    verticalExaggeration,
-    colorScale,
-    colorMin,
-    colorMax,
-    scaleType,
-    setHoveredPoint,
-  } = useOceanStore();
+  const currentSlice = useOceanStore((s) => s.currentSlice);
+  const selectedDepth = useOceanStore((s) => s.selectedDepth);
+  const verticalExaggeration = useOceanStore((s) => s.verticalExaggeration);
+  const colorScale = useOceanStore((s) => s.colorScale);
+  const colorMin = useOceanStore((s) => s.colorMin);
+  const colorMax = useOceanStore((s) => s.colorMax);
+  const scaleType = useOceanStore((s) => s.scaleType);
+  const setHoveredPoint = useOceanStore((s) => s.setHoveredPoint);
+
+  const animFrameRef = useRef<number | null>(null);
 
   const activeBoxHeight = boxHeight * (verticalExaggeration / 5);
-  // Negative depth downwards in Three.js coordinates, with tiny nudge to prevent z-fighting with grid surface
   const sliceY = -(selectedDepth / maxDepthMeters) * activeBoxHeight - 0.002;
-
   const finalOpacity = overrideOpacity ?? 0.95;
 
   // Generate GPU DataTexture from live backend slice matrix
@@ -58,42 +56,67 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
     };
   }, [texture]);
 
+  // Cleanup animation frame timer on unmount
+  useEffect(() => {
+    return () => {
+      if (animFrameRef.current !== null) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+    };
+  }, []);
+
   const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     if (!e.uv || !currentSlice || !currentSlice.data) return;
 
-    const nLat = currentSlice.data.length;
-    const nLon = currentSlice.data[0].length;
+    const nativeX = e.nativeEvent.clientX;
+    const nativeY = e.nativeEvent.clientY;
+    const uvX = e.uv.x;
+    const uvY = e.uv.y;
 
-    const u = Math.max(0, Math.min(1, e.uv.x));
-    const v = Math.max(0, Math.min(1, e.uv.y));
+    if (animFrameRef.current !== null) return;
 
-    const minLon = currentSlice.longitudes[0] ?? 55.0;
-    const maxLon = currentSlice.longitudes[currentSlice.longitudes.length - 1] ?? 100.0;
-    const minLat = currentSlice.latitudes[0] ?? 0.0;
-    const maxLat = currentSlice.latitudes[currentSlice.latitudes.length - 1] ?? 30.0;
+    animFrameRef.current = requestAnimationFrame(() => {
+      animFrameRef.current = null;
+      if (!currentSlice || !currentSlice.data) return;
 
-    const lon = minLon + u * (maxLon - minLon);
-    const lat = minLat + v * (maxLat - minLat);
+      const nLat = currentSlice.data.length;
+      const nLon = currentSlice.data[0].length;
 
-    const latIdx = Math.max(0, Math.min(nLat - 1, Math.round(v * (nLat - 1))));
-    const lonIdx = Math.max(0, Math.min(nLon - 1, Math.round(u * (nLon - 1))));
+      const u = Math.max(0, Math.min(1, uvX));
+      const v = Math.max(0, Math.min(1, uvY));
 
-    const val = currentSlice.data[latIdx]?.[lonIdx] ?? 0;
+      const minLon = currentSlice.longitudes[0] ?? 55.0;
+      const maxLon = currentSlice.longitudes[currentSlice.longitudes.length - 1] ?? 100.0;
+      const minLat = currentSlice.latitudes[0] ?? 0.0;
+      const maxLat = currentSlice.latitudes[currentSlice.latitudes.length - 1] ?? 30.0;
 
-    setHoveredPoint({
-      lat: Math.round(lat * 100) / 100,
-      lon: Math.round(lon * 100) / 100,
-      depth: Math.round(selectedDepth),
-      val: Math.round(val * 100) / 100,
-      varName: currentSlice.display_name,
-      units: currentSlice.units,
-      x: e.nativeEvent.clientX,
-      y: e.nativeEvent.clientY,
+      const lon = minLon + u * (maxLon - minLon);
+      const lat = minLat + v * (maxLat - minLat);
+
+      const latIdx = Math.max(0, Math.min(nLat - 1, Math.round(v * (nLat - 1))));
+      const lonIdx = Math.max(0, Math.min(nLon - 1, Math.round(u * (nLon - 1))));
+
+      const val = currentSlice.data[latIdx]?.[lonIdx] ?? 0;
+
+      setHoveredPoint({
+        lat: Math.round(lat * 100) / 100,
+        lon: Math.round(lon * 100) / 100,
+        depth: Math.round(selectedDepth),
+        val: Math.round(val * 100) / 100,
+        varName: currentSlice.display_name,
+        units: currentSlice.units,
+        x: nativeX,
+        y: nativeY,
+      });
     });
   };
 
   const handlePointerLeave = () => {
+    if (animFrameRef.current !== null) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
     setHoveredPoint(null);
   };
 
@@ -135,3 +158,5 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
     </mesh>
   );
 };
+
+export const DepthSliceMesh = React.memo(DepthSliceMeshComponent);

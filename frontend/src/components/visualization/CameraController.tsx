@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { useOceanStore } from '../../store/oceanStore';
 
 export const CameraController: React.FC = () => {
-  const { cameraPreset } = useOceanStore();
+  const cameraPreset = useOceanStore((s) => s.cameraPreset);
   const { camera } = useThree();
   const targetPos = useRef<THREE.Vector3>(new THREE.Vector3(14, 20, 22));
   const targetLookAt = useRef<THREE.Vector3>(new THREE.Vector3(0, -2, 0));
@@ -32,10 +32,12 @@ export const CameraController: React.FC = () => {
   useFrame(() => {
     if (!isTransitioning.current) return;
 
-    camera.position.lerp(targetPos.current, 0.06);
+    camera.position.lerp(targetPos.current, 0.08);
+    camera.lookAt(targetLookAt.current);
 
-    if (camera.position.distanceTo(targetPos.current) < 0.2) {
+    if (camera.position.distanceTo(targetPos.current) < 0.1) {
       camera.position.copy(targetPos.current);
+      camera.lookAt(targetLookAt.current);
       isTransitioning.current = false;
     }
   });

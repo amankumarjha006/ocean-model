@@ -5,25 +5,21 @@ import * as THREE from 'three';
 
 /**
  * 3D Ocean Domain Bounding Box and Coordinate Grid Frame.
- * Scaled:
- * X: Longitude (55°E to 100°E) -> mapped to [-10, 10]
- * Y: Depth (0m to -1000m) -> mapped to [0, -6] * verticalExaggeration
- * Z: Latitude (0°N to 30°N) -> mapped to [-6, 6]
  */
-export const CoordinateGrid: React.FC = () => {
-  const { showGrid, verticalExaggeration, showBathymetry } = useOceanStore();
+const CoordinateGridComponent: React.FC = () => {
+  const showGrid = useOceanStore((s) => s.showGrid);
+  const verticalExaggeration = useOceanStore((s) => s.verticalExaggeration);
+  const showBathymetry = useOceanStore((s) => s.showBathymetry);
 
-  const boxWidth = 20; // Lon
-  const boxHeight = 6 * (verticalExaggeration / 5); // Depth
-  const boxDepth = 12; // Lat
+  const boxWidth = 20;
+  const boxHeight = 6 * (verticalExaggeration / 5);
+  const boxDepth = 12;
 
-  // Domain coordinate ranges
   const minLon = 55;
   const maxLon = 100;
   const minLat = 0;
   const maxLat = 30;
 
-  // Pre-created EdgesGeometry for depth level frames to avoid re-allocating memory in render
   const edgeGeo = useMemo(() => {
     const boxGeo = new THREE.BoxGeometry(boxWidth, 0.01, boxDepth);
     const edges = new THREE.EdgesGeometry(boxGeo);
@@ -39,16 +35,13 @@ export const CoordinateGrid: React.FC = () => {
 
   if (!showGrid) return null;
 
-  // Depth levels for reference lines and labels
   const depthLevels = [
     { normDepth: -0.2, depthM: 200 },
     { normDepth: -0.5, depthM: 500 },
     { normDepth: -1.0, depthM: 1000 },
   ];
 
-  // Longitude tick positions (every 5° from 55 to 100)
   const lonTicks = [55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
-  // Latitude tick positions (every 5° from 0 to 30)
   const latTicks = [0, 5, 10, 15, 20, 25, 30];
 
   const lonToX = (lon: number) => -boxWidth / 2 + ((lon - minLon) / (maxLon - minLon)) * boxWidth;
@@ -68,7 +61,7 @@ export const CoordinateGrid: React.FC = () => {
         />
       </mesh>
 
-      {/* Surface reference boundary (nudge slightly to y=0.005 to prevent z-fighting with slice at 0) */}
+      {/* Surface reference boundary */}
       <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[boxWidth, boxDepth]} />
         <meshBasicMaterial
@@ -80,7 +73,7 @@ export const CoordinateGrid: React.FC = () => {
         />
       </mesh>
 
-      {/* Seafloor bottom boundary mesh (Bathymetric floor placeholder) */}
+      {/* Seafloor bottom boundary mesh */}
       {showBathymetry && (
         <mesh position={[0, -boxHeight, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[boxWidth, boxDepth, 16, 16]} />
@@ -101,7 +94,6 @@ export const CoordinateGrid: React.FC = () => {
               <lineBasicMaterial color="#3b82f6" transparent opacity={0.12} depthWrite={false} />
             </lineSegments>
 
-            {/* Depth tick label at left edge */}
             <Text
               position={[-boxWidth / 2 - 0.6, y, boxDepth / 2]}
               fontSize={0.4}
@@ -126,7 +118,7 @@ export const CoordinateGrid: React.FC = () => {
         0m
       </Text>
 
-      {/* Longitude tick labels along the front edge */}
+      {/* Longitude tick labels */}
       {lonTicks.filter((_, i) => i % 2 === 0).map((lon) => (
         <Text
           key={`lon-${lon}`}
@@ -140,7 +132,7 @@ export const CoordinateGrid: React.FC = () => {
         </Text>
       ))}
 
-      {/* Latitude tick labels along the right edge */}
+      {/* Latitude tick labels */}
       {latTicks.filter((_, i) => i % 2 === 0).map((lat) => (
         <Text
           key={`lat-${lat}`}
@@ -156,3 +148,5 @@ export const CoordinateGrid: React.FC = () => {
     </group>
   );
 };
+
+export const CoordinateGrid = React.memo(CoordinateGridComponent);

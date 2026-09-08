@@ -11,21 +11,19 @@ interface CurrentFlowFieldProps {
   maxDepthMeters?: number;
 }
 
-export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
+const CurrentFlowFieldComponent: React.FC<CurrentFlowFieldProps> = ({
   boxWidth = 20,
   boxDepth = 12,
   boxHeight = 6,
   maxDepthMeters = 1000,
 }) => {
-  const {
-    uSlice,
-    vSlice,
-    selectedDepth,
-    verticalExaggeration,
-    currentDensity,
-    currentSpeedScale,
-    currentOpacity,
-  } = useOceanStore();
+  const uSlice = useOceanStore((s) => s.uSlice);
+  const vSlice = useOceanStore((s) => s.vSlice);
+  const selectedDepth = useOceanStore((s) => s.selectedDepth);
+  const verticalExaggeration = useOceanStore((s) => s.verticalExaggeration);
+  const currentDensity = useOceanStore((s) => s.currentDensity);
+  const currentSpeedScale = useOceanStore((s) => s.currentSpeedScale);
+  const currentOpacity = useOceanStore((s) => s.currentOpacity);
 
   const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
   const particlesRef = useRef<THREE.Points>(null);
@@ -135,7 +133,7 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
     };
   }, [uSlice, vSlice, boxWidth, boxDepth, sliceY, currentDensity, currentSpeedScale]);
 
-  // Update instanced mesh buffer attributes ONCE on data change, not on every render
+  // Update instanced mesh buffer attributes ONCE on data change
   useEffect(() => {
     const mesh = instancedMeshRef.current;
     if (!mesh || instanceCount === 0) return;
@@ -243,3 +241,5 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
     </group>
   );
 };
+
+export const CurrentFlowField = React.memo(CurrentFlowFieldComponent);

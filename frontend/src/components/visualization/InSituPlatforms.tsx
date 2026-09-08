@@ -10,20 +10,18 @@ interface InSituPlatformsProps {
   maxDepthMeters?: number;
 }
 
-export const InSituPlatforms: React.FC<InSituPlatformsProps> = ({
+const InSituPlatformsComponent: React.FC<InSituPlatformsProps> = ({
   boxWidth = 20,
   boxDepth = 12,
   boxHeight = 6,
   maxDepthMeters = 1000,
 }) => {
-  const {
-    showArgo,
-    showGliders,
-    verticalExaggeration,
-    dataset,
-    selectedObservation,
-    setSelectedObservation,
-  } = useOceanStore();
+  const showArgo = useOceanStore((s) => s.showArgo);
+  const showGliders = useOceanStore((s) => s.showGliders);
+  const verticalExaggeration = useOceanStore((s) => s.verticalExaggeration);
+  const dataset = useOceanStore((s) => s.dataset);
+  const selectedObservation = useOceanStore((s) => s.selectedObservation);
+  const setSelectedObservation = useOceanStore((s) => s.setSelectedObservation);
 
   const activeBoxHeight = boxHeight * (verticalExaggeration / 5);
 
@@ -212,3 +210,5 @@ export const InSituPlatforms: React.FC<InSituPlatformsProps> = ({
     </group>
   );
 };
+
+export const InSituPlatforms = React.memo(InSituPlatformsComponent);

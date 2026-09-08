@@ -11,19 +11,17 @@ interface IsosurfaceMeshProps {
   maxDepthMeters?: number;
 }
 
-export const IsosurfaceMesh: React.FC<IsosurfaceMeshProps> = ({
+const IsosurfaceMeshComponent: React.FC<IsosurfaceMeshProps> = ({
   boxWidth = 20,
   boxDepth = 12,
   boxHeight = 6,
 }) => {
-  const {
-    volumeData,
-    isosurfaceThreshold,
-    verticalExaggeration,
-    colorScale,
-    colorMin,
-    colorMax,
-  } = useOceanStore();
+  const volumeData = useOceanStore((s) => s.volumeData);
+  const isosurfaceThreshold = useOceanStore((s) => s.isosurfaceThreshold);
+  const verticalExaggeration = useOceanStore((s) => s.verticalExaggeration);
+  const colorScale = useOceanStore((s) => s.colorScale);
+  const colorMin = useOceanStore((s) => s.colorMin);
+  const colorMax = useOceanStore((s) => s.colorMax);
 
   const activeBoxHeight = boxHeight * (verticalExaggeration / 5);
 
@@ -89,3 +87,5 @@ export const IsosurfaceMesh: React.FC<IsosurfaceMeshProps> = ({
     </mesh>
   );
 };
+
+export const IsosurfaceMesh = React.memo(IsosurfaceMeshComponent);
