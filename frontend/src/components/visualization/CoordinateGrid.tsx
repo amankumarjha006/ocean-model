@@ -88,12 +88,12 @@ export const CoordinateGrid: React.FC = () => {
               />
               <lineBasicMaterial color="#3b82f6" transparent opacity={0.12} /> {/* Subtler */}
             </lineSegments>
-            {/* Depth tick label at left edge, billboarded */}
+            {/* Depth tick label at front-right edge, billboarded */}
             <Text
-              position={[-boxWidth / 2 - 0.6, y, boxDepth / 2]}
+              position={[boxWidth / 2 + 0.6, y, boxDepth / 2]}
               fontSize={0.4}
               color="#94a3b8"
-              anchorX="right"
+              anchorX="left"
               anchorY="middle"
               font={undefined}
             >
@@ -105,10 +105,10 @@ export const CoordinateGrid: React.FC = () => {
 
       {/* Surface depth label (0m) */}
       <Text
-        position={[-boxWidth / 2 - 0.6, 0, boxDepth / 2]}
+        position={[boxWidth / 2 + 0.6, 0, boxDepth / 2]}
         fontSize={0.4}
         color="#94a3b8"
-        anchorX="right"
+        anchorX="left"
         anchorY="middle"
         font={undefined}
       >
