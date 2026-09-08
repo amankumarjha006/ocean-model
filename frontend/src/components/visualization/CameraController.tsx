@@ -6,7 +6,7 @@ import { useOceanStore } from '../../store/oceanStore';
 export const CameraController: React.FC = () => {
   const { cameraPreset } = useOceanStore();
   const { camera } = useThree();
-  const targetPos = useRef<THREE.Vector3>(new THREE.Vector3(16, 12, 18));
+  const targetPos = useRef<THREE.Vector3>(new THREE.Vector3(14, 20, 22));
   const targetLookAt = useRef<THREE.Vector3>(new THREE.Vector3(0, -2, 0));
   const isTransitioning = useRef<boolean>(false);
 
@@ -22,7 +22,7 @@ export const CameraController: React.FC = () => {
         break;
       case 'default':
       default:
-        targetPos.current.set(16, 12, 18);
+        targetPos.current.set(14, 20, 22);
         targetLookAt.current.set(0, -2, 0);
         break;
     }

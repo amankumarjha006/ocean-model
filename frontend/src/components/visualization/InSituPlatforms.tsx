@@ -1,5 +1,6 @@
 import React from 'react';
 import * as THREE from 'three';
+import { Html } from '@react-three/drei';
 import { useOceanStore } from '../../store/oceanStore';
 
 interface InSituPlatformsProps {
@@ -63,9 +64,34 @@ export const InSituPlatforms: React.FC<InSituPlatformsProps> = ({
                 setSelectedObservation(argo);
               }}
             >
-              {/* Surface float body */}
-              <mesh position={[0, 0.25, 0]}>
-                <cylinderGeometry args={[0.22, 0.22, 0.65, 16]} />
+              {/* Floating label above the float */}
+              <Html
+                position={[0, 1.8, 0]}
+                distanceFactor={10}
+                style={{
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <div style={{
+                  background: 'rgba(9, 18, 32, 0.85)',
+                  color: isSelected ? '#38bdf8' : '#f59e0b',
+                  fontSize: '10px',
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontWeight: 600,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  border: `1px solid ${isSelected ? 'rgba(56,189,248,0.4)' : 'rgba(245,158,11,0.3)'}`,
+                  textAlign: 'center',
+                }}>
+                  {argo.id}
+                </div>
+              </Html>
+
+              {/* Surface float body — scaled up for visibility */}
+              <mesh position={[0, 0.3, 0]}>
+                <cylinderGeometry args={[0.35, 0.35, 1.0, 16]} />
                 <meshStandardMaterial
                   color={isSelected ? '#38bdf8' : '#f59e0b'}
                   roughness={0.2}
@@ -75,14 +101,14 @@ export const InSituPlatforms: React.FC<InSituPlatformsProps> = ({
               </mesh>
 
               {/* Antenna */}
-              <mesh position={[0, 0.78, 0]}>
-                <cylinderGeometry args={[0.02, 0.02, 0.45, 8]} />
+              <mesh position={[0, 1.1, 0]}>
+                <cylinderGeometry args={[0.03, 0.03, 0.6, 8]} />
                 <meshBasicMaterial color="#ffffff" />
               </mesh>
 
               {/* Blinking signal beacon */}
-              <mesh position={[0, 1.05, 0]}>
-                <sphereGeometry args={[0.07, 8, 8]} />
+              <mesh position={[0, 1.5, 0]}>
+                <sphereGeometry args={[0.09, 8, 8]} />
                 <meshBasicMaterial color="#38bdf8" />
               </mesh>
 
@@ -107,7 +133,7 @@ export const InSituPlatforms: React.FC<InSituPlatformsProps> = ({
 
               {/* Bottom sensor package */}
               <mesh position={[0, bottomY, 0]}>
-                <sphereGeometry args={[0.15, 12, 12]} />
+                <sphereGeometry args={[0.2, 12, 12]} />
                 <meshStandardMaterial color="#f59e0b" />
               </mesh>
             </group>
@@ -133,6 +159,31 @@ export const InSituPlatforms: React.FC<InSituPlatformsProps> = ({
                 setSelectedObservation(glider);
               }}
             >
+              {/* Floating label above the glider */}
+              <Html
+                position={[0, 1.2, 0]}
+                distanceFactor={10}
+                style={{
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <div style={{
+                  background: 'rgba(9, 18, 32, 0.85)',
+                  color: isSelected ? '#38bdf8' : '#10b981',
+                  fontSize: '10px',
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontWeight: 600,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  border: `1px solid ${isSelected ? 'rgba(56,189,248,0.4)' : 'rgba(16,185,129,0.3)'}`,
+                  textAlign: 'center',
+                }}>
+                  {glider.id}
+                </div>
+              </Html>
+
               {/* Torpedo Glider fuselage */}
               <mesh rotation={[0.2, 0.5, 0]}>
                 <coneGeometry args={[0.22, 1.2, 8]} />

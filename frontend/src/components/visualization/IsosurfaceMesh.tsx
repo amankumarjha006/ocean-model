@@ -72,10 +72,8 @@ export const IsosurfaceMesh: React.FC<IsosurfaceMeshProps> = ({
 
   return (
     <mesh geometry={geometry}>
-      <meshStandardMaterial
+      <meshBasicMaterial
         color={surfaceColor}
-        roughness={0.3}
-        metalness={0.08}
         transparent
         opacity={0.88}
         side={THREE.DoubleSide}

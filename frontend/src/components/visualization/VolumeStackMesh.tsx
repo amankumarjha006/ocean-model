@@ -75,10 +75,8 @@ export const VolumeStackMesh: React.FC<VolumeStackMeshProps> = ({
           rotation={[-Math.PI / 2, 0, 0]}
         >
           <planeGeometry args={[boxWidth, boxDepth, 32, 32]} />
-          <meshStandardMaterial
+          <meshBasicMaterial
             map={layer.texture}
-            roughness={0.55}
-            metalness={0.05}
             transparent
             opacity={layer.opacity}
             depthWrite={false}

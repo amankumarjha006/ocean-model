@@ -9,6 +9,7 @@ interface DepthSliceMeshProps {
   boxDepth?: number;
   boxHeight?: number;
   maxDepthMeters?: number;
+  overrideOpacity?: number;
 }
 
 export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
@@ -16,6 +17,7 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
   boxDepth = 12,
   boxHeight = 6,
   maxDepthMeters = 1000,
+  overrideOpacity,
 }) => {
   const {
     currentSlice,
@@ -32,6 +34,8 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
   // Negative depth downwards in Three.js coordinates
   const sliceY = -(selectedDepth / maxDepthMeters) * activeBoxHeight;
 
+  const finalOpacity = overrideOpacity ?? 0.95;
+
   // Generate GPU DataTexture from live backend slice matrix
   const texture = useMemo(() => {
     if (!currentSlice || !currentSlice.data || currentSlice.data.length === 0) {
@@ -43,9 +47,9 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
       colorMax,
       colorScale,
       scaleType,
-      245
+      Math.round(finalOpacity * 255)
     );
-  }, [currentSlice, colorMin, colorMax, colorScale, scaleType]);
+  }, [currentSlice, colorMin, colorMax, colorScale, scaleType, finalOpacity]);
 
   const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
@@ -95,7 +99,7 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
         rotation={[-Math.PI / 2, 0, 0]}
       >
         <planeGeometry args={[boxWidth, boxDepth]} />
-        <meshStandardMaterial
+        <meshBasicMaterial
           color="#1e293b"
           transparent
           opacity={0.3}
@@ -113,12 +117,10 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
       onPointerLeave={handlePointerLeave}
     >
       <planeGeometry args={[boxWidth, boxDepth, 64, 64]} />
-      <meshStandardMaterial
+      <meshBasicMaterial
         map={texture}
-        roughness={0.35}
-        metalness={0.08}
         transparent
-        opacity={0.95}
+        opacity={finalOpacity}
         side={THREE.DoubleSide}
       />
     </mesh>

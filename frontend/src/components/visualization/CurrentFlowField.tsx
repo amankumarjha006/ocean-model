@@ -69,6 +69,18 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
     const nLat = uSlice.data.length;
     const nLon = uSlice.data[0].length;
 
+    // Compute max speed across the entire field for dynamic thresholding
+    let globalMaxSpeed = 0;
+    for (let iz = 0; iz < nLat; iz++) {
+      for (let ix = 0; ix < nLon; ix++) {
+        const u = uSlice.data[iz][ix] ?? 0;
+        const v = vSlice.data[iz][ix] ?? 0;
+        const sp = Math.hypot(u, v);
+        if (sp > globalMaxSpeed) globalMaxSpeed = sp;
+      }
+    }
+    const speedCutoff = globalMaxSpeed * 0.05;
+
     // Subsample based on currentDensity (e.g. step 2 => 32x48 = 1536 arrows)
     const step = Math.max(2, currentDensity * 2);
 
@@ -89,8 +101,8 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
         const v = vSlice.data[iz][ix] ?? 0;
         const speed = Math.hypot(u, v);
 
-        // Skip negligible currents
-        if (speed < 0.04) continue;
+        // Skip negligible currents using dynamic threshold
+        if (speed < speedCutoff) continue;
 
         // Angle in horizontal plane: u is along X+ (East), v is along Z- (North in 3D Three.js)
         // Three.js: X+ is East, Z- is North
@@ -99,14 +111,16 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
         dummy.position.set(worldX, sliceY + 0.06, worldZ);
         dummy.rotation.set(0, angle - Math.PI / 2, 0);
 
-        const arrowScale = Math.min(2.0, Math.max(0.3, speed * currentSpeedScale * 1.5));
+        // Scale arrows relative to the field's own max speed for consistent visual density
+        const normalizedSpeed = globalMaxSpeed > 0 ? speed / globalMaxSpeed : 0.5;
+        const arrowScale = Math.min(2.0, Math.max(0.3, normalizedSpeed * currentSpeedScale * 2.0));
         dummy.scale.set(arrowScale, arrowScale, arrowScale);
         dummy.updateMatrix();
 
         matList.push(dummy.matrix.clone());
 
-        // Colormap speed: 0.0 to 2.0 m/s
-        const t = Math.max(0, Math.min(1, speed / 2.0));
+        // Colormap speed: normalize to field max
+        const t = Math.max(0, Math.min(1, normalizedSpeed));
         const [r, g, b] = samplePalette('speed', t);
         colList.push(new THREE.Color(r / 255, g / 255, b / 255));
 

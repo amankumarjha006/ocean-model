@@ -21,6 +21,7 @@ export const OceanViewport: React.FC = () => {
     selectedDepth,
     selectedScenario,
     volumeLayerCount,
+    showCurrents,
     setCurrentSlice,
     setVolumeData,
     setUSlice,
@@ -137,7 +138,7 @@ export const OceanViewport: React.FC = () => {
         <pointLight position={[0, 10, 0]} intensity={0.25} color="#7dd3fc" />
 
         {/* Camera and Dynamic Preset Animation */}
-        <PerspectiveCamera makeDefault position={[16, 12, 18]} fov={45} />
+        <PerspectiveCamera makeDefault position={[14, 20, 22]} fov={45} />
         <CameraController />
 
         {/* Interactive Controls */}
@@ -170,7 +171,7 @@ export const OceanViewport: React.FC = () => {
           {vizMode === 'slice' && (
             <>
               <DepthSliceMesh />
-              <CurrentFlowField />
+              {showCurrents && <CurrentFlowField />}
             </>
           )}
 
@@ -178,7 +179,7 @@ export const OceanViewport: React.FC = () => {
           {vizMode === 'volume' && (
             <>
               <VolumeStackMesh />
-              <DepthSliceMesh />
+              {showCurrents && <CurrentFlowField />}
             </>
           )}
 
@@ -194,7 +195,7 @@ export const OceanViewport: React.FC = () => {
           {vizMode === 'isosurface' && (
             <>
               <IsosurfaceMesh />
-              <DepthSliceMesh />
+              <DepthSliceMesh overrideOpacity={0.25} />
             </>
           )}
 
