@@ -9,7 +9,7 @@ export interface ColorStop {
 
 export const COLOR_PALETTES: Record<string, ColorStop[]> = {
   thermal: [
-    { stop: 0.0, r: 15, g: 23, b: 90 },     // Deep abyss blue
+    { stop: 0.0, r: 30, g: 58, b: 138 },    // Deep visible blue (was rgb(15,23,90) / too dark)
     { stop: 0.2, r: 14, g: 116, b: 144 },  // Ocean teal
     { stop: 0.4, r: 16, g: 185, b: 129 },  // Emerald green
     { stop: 0.6, r: 234, g: 179, b: 8 },   // Amber
@@ -17,14 +17,14 @@ export const COLOR_PALETTES: Record<string, ColorStop[]> = {
     { stop: 1.0, r: 225, g: 29, b: 72 },   // Tropical thermal red
   ],
   haline: [
-    { stop: 0.0, r: 8, g: 47, b: 73 },     // Fresh river runoff blue
+    { stop: 0.0, r: 12, g: 74, b: 110 },   // Fresh river runoff blue (was rgb(8,47,73))
     { stop: 0.25, r: 13, g: 148, b: 136 }, // Low salinity cyan
     { stop: 0.5, r: 52, g: 211, b: 153 },  // Baseline salinity mint
     { stop: 0.75, r: 250, g: 204, b: 21 }, // High salinity sand
     { stop: 1.0, r: 217, g: 119, b: 6 },   // Hyper-saline Arabian Sea amber
   ],
   algae: [
-    { stop: 0.0, r: 15, g: 23, b: 42 },    // Oligotrophic dark waters
+    { stop: 0.0, r: 2, g: 44, b: 34 },     // Oligotrophic dark waters (was rgb(15,23,42))
     { stop: 0.15, r: 6, g: 78, b: 59 },    // Low bloom forest
     { stop: 0.4, r: 16, g: 185, b: 129 },  // Active phytoplankton green
     { stop: 0.7, r: 132, g: 204, b: 22 },  // Subsurface chlorophyll max (SCM) lime
@@ -38,7 +38,7 @@ export const COLOR_PALETTES: Record<string, ColorStop[]> = {
     { stop: 1.0, r: 220, g: 38, b: 38 },   // Positive anomaly red
   ],
   speed: [
-    { stop: 0.0, r: 30, g: 27, b: 75 },    // Stagnant / calm deep indigo
+    { stop: 0.0, r: 49, g: 46, b: 129 },   // Stagnant / calm deep indigo (was rgb(30,27,75))
     { stop: 0.2, r: 6, g: 182, b: 212 },   // Light drift cyan
     { stop: 0.45, r: 16, g: 185, b: 129 }, // Moderate current green
     { stop: 0.7, r: 245, g: 158, b: 11 },  // Energetic jet amber

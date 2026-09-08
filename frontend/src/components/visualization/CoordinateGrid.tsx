@@ -49,7 +49,7 @@ export const CoordinateGrid: React.FC = () => {
           color="#3b82f6"
           wireframe
           transparent
-          opacity={0.4}
+          opacity={0.12} // Subtler to let data dominate
         />
       </mesh>
 
@@ -60,7 +60,7 @@ export const CoordinateGrid: React.FC = () => {
           color="#3b82f6"
           wireframe
           transparent
-          opacity={0.25}
+          opacity={0.10} // Subtler
         />
       </mesh>
 
@@ -84,7 +84,7 @@ export const CoordinateGrid: React.FC = () => {
               <edgesGeometry
                 args={[new THREE.BoxGeometry(boxWidth, 0.01, boxDepth)]}
               />
-              <lineBasicMaterial color="#3b82f6" transparent opacity={0.35} />
+              <lineBasicMaterial color="#3b82f6" transparent opacity={0.12} /> {/* Subtler */}
             </lineSegments>
             {/* Depth tick label at left edge, billboarded */}
             <Text

@@ -41,15 +41,16 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
     if (!currentSlice || !currentSlice.data || currentSlice.data.length === 0) {
       return null;
     }
+    // Set texture alpha to 255. Opacity is handled by the material properties.
     return createDataTexture(
       currentSlice.data,
       colorMin,
       colorMax,
       colorScale,
       scaleType,
-      Math.round(finalOpacity * 255)
+      255
     );
-  }, [currentSlice, colorMin, colorMax, colorScale, scaleType, finalOpacity]);
+  }, [currentSlice, colorMin, colorMax, colorScale, scaleType]);
 
   const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
@@ -104,6 +105,7 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
           transparent
           opacity={0.3}
           side={THREE.DoubleSide}
+          toneMapped={false}
         />
       </mesh>
     );
@@ -122,6 +124,7 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
         transparent
         opacity={finalOpacity}
         side={THREE.DoubleSide}
+        toneMapped={false}
       />
     </mesh>
   );
