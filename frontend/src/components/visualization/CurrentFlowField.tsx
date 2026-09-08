@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { useOceanStore } from '../../store/oceanStore';
@@ -27,12 +27,13 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
     currentOpacity,
   } = useOceanStore();
 
+  const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
   const particlesRef = useRef<THREE.Points>(null);
 
   const activeBoxHeight = boxHeight * (verticalExaggeration / 5);
   const sliceY = -(selectedDepth / maxDepthMeters) * activeBoxHeight;
 
-  // Arrow Geometry (stem cylinder + tip cone merged into single geometry)
+  // Arrow Geometry (stem cylinder + tip cone merged)
   const arrowGeometry = useMemo(() => {
     const cylinder = new THREE.CylinderGeometry(0.025, 0.025, 0.5, 6);
     cylinder.translate(0, 0.25, 0);
@@ -40,7 +41,6 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
     const cone = new THREE.ConeGeometry(0.08, 0.25, 8);
     cone.translate(0, 0.5 + 0.125, 0);
 
-    // Merge geometries
     const merged = new THREE.BufferGeometry();
     const pos1 = cylinder.getAttribute('position');
     const pos2 = cone.getAttribute('position');
@@ -53,12 +53,19 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
 
     merged.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     merged.computeVertexNormals();
-
-    // Rotate so default points along Z+ (or X+) in XZ plane
     merged.rotateX(Math.PI / 2);
+
+    cylinder.dispose();
+    cone.dispose();
 
     return merged;
   }, []);
+
+  useEffect(() => {
+    return () => {
+      arrowGeometry.dispose();
+    };
+  }, [arrowGeometry]);
 
   // Compute instance matrices and colors
   const { instanceCount, matrices, colors, particleVectors } = useMemo(() => {
@@ -69,7 +76,6 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
     const nLat = uSlice.data.length;
     const nLon = uSlice.data[0].length;
 
-    // Compute max speed across the entire field for dynamic thresholding
     let globalMaxSpeed = 0;
     for (let iz = 0; iz < nLat; iz++) {
       for (let ix = 0; ix < nLon; ix++) {
@@ -81,7 +87,6 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
     }
     const speedCutoff = globalMaxSpeed * 0.05;
 
-    // Subsample based on currentDensity (e.g. step 2 => 32x48 = 1536 arrows)
     const step = Math.max(2, currentDensity * 2);
 
     const matList: THREE.Matrix4[] = [];
@@ -91,7 +96,6 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
     const dummy = new THREE.Object3D();
 
     for (let iz = 0; iz < nLat; iz += step) {
-      // Invert Z so lat 0 is at bottom (Z = boxDepth/2) and lat 30 is at top (Z = -boxDepth/2)
       const worldZ = boxDepth / 2 - (iz / (nLat - 1)) * boxDepth;
 
       for (let ix = 0; ix < nLon; ix += step) {
@@ -101,17 +105,13 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
         const v = vSlice.data[iz][ix] ?? 0;
         const speed = Math.hypot(u, v);
 
-        // Skip negligible currents using dynamic threshold
         if (speed < speedCutoff) continue;
 
-        // Angle in horizontal plane: u is along X+ (East), v is along Z- (North in 3D Three.js)
-        // Three.js: X+ is East, Z- is North
         const angle = Math.atan2(-v, u);
 
         dummy.position.set(worldX, sliceY + 0.06, worldZ);
         dummy.rotation.set(0, angle - Math.PI / 2, 0);
 
-        // Scale arrows relative to the field's own max speed for consistent visual density
         const normalizedSpeed = globalMaxSpeed > 0 ? speed / globalMaxSpeed : 0.5;
         const arrowScale = Math.min(2.0, Math.max(0.3, normalizedSpeed * currentSpeedScale * 2.0));
         dummy.scale.set(arrowScale, arrowScale, arrowScale);
@@ -119,7 +119,6 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
 
         matList.push(dummy.matrix.clone());
 
-        // Colormap speed: normalize to field max
         const t = Math.max(0, Math.min(1, normalizedSpeed));
         const [r, g, b] = samplePalette('speed', t);
         colList.push(new THREE.Color(r / 255, g / 255, b / 255));
@@ -136,7 +135,20 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
     };
   }, [uSlice, vSlice, boxWidth, boxDepth, sliceY, currentDensity, currentSpeedScale]);
 
-  // Animated streamline particles
+  // Update instanced mesh buffer attributes ONCE on data change, not on every render
+  useEffect(() => {
+    const mesh = instancedMeshRef.current;
+    if (!mesh || instanceCount === 0) return;
+
+    for (let i = 0; i < instanceCount; i++) {
+      mesh.setMatrixAt(i, matrices[i]);
+      if (colors[i]) mesh.setColorAt(i, colors[i]);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  }, [instanceCount, matrices, colors]);
+
+  // Streamline particle geometry
   const particleCount = 200;
   const particleGeo = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -152,24 +164,28 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
     return geo;
   }, [boxWidth, boxDepth, sliceY]);
 
-  // Animation frame loop for drift particles
+  useEffect(() => {
+    return () => {
+      particleGeo.dispose();
+    };
+  }, [particleGeo]);
+
   useFrame((_, delta) => {
     if (!particlesRef.current || particleVectors.length === 0) return;
 
     const posAttr = particlesRef.current.geometry.getAttribute('position') as THREE.BufferAttribute;
+    if (!posAttr) return;
     const arr = posAttr.array as Float32Array;
 
     for (let i = 0; i < particleCount; i++) {
       let x = arr[i * 3];
       let z = arr[i * 3 + 2];
 
-      // Find nearest vector in particleVectors
       let cu = 0.3;
       let cv = 0.0;
       let minD = 999;
 
-      // Sample a subset for performance
-      for (let k = 0; k < Math.min(30, particleVectors.length); k++) {
+      for (let k = 0; k < Math.min(20, particleVectors.length); k++) {
         const idx = (i * 3 + k) % particleVectors.length;
         const p = particleVectors[idx];
         const dist = (p.x - x) * (p.x - x) + (p.z - z) * (p.z - z);
@@ -180,12 +196,10 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
         }
       }
 
-      // Advect particle
       const dt = delta * 4 * currentSpeedScale;
       x += cu * dt;
-      z -= cv * dt; // -v is northward (Z-)
+      z -= cv * dt;
 
-      // Wrap around domain boundaries
       if (x > boxWidth / 2) x = -boxWidth / 2;
       if (x < -boxWidth / 2) x = boxWidth / 2;
       if (z > boxDepth / 2) z = -boxDepth / 2;
@@ -201,31 +215,21 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
 
   return (
     <group>
-      {/* GPU Vector Arrow Instances */}
       {instanceCount > 0 && (
         <instancedMesh
-          ref={(mesh) => {
-            if (mesh) {
-              for (let i = 0; i < instanceCount; i++) {
-                mesh.setMatrixAt(i, matrices[i]);
-                mesh.setColorAt(i, colors[i]);
-              }
-              mesh.instanceMatrix.needsUpdate = true;
-              if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-            }
-          }}
-          args={[arrowGeometry, undefined as any, instanceCount]}
+          ref={instancedMeshRef}
+          args={[arrowGeometry, undefined, instanceCount]}
         >
           <meshStandardMaterial
             roughness={0.35}
             metalness={0.4}
             transparent
             opacity={currentOpacity}
+            depthWrite={false}
           />
         </instancedMesh>
       )}
 
-      {/* Dynamic Advecting Streamline Particles */}
       <points ref={particlesRef} geometry={particleGeo}>
         <pointsMaterial
           size={0.12}
@@ -233,6 +237,7 @@ export const CurrentFlowField: React.FC<CurrentFlowFieldProps> = ({
           transparent
           opacity={0.65}
           blending={THREE.AdditiveBlending}
+          depthWrite={false}
         />
       </points>
     </group>

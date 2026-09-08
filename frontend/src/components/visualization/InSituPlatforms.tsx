@@ -89,7 +89,7 @@ export const InSituPlatforms: React.FC<InSituPlatformsProps> = ({
                 </div>
               </Html>
 
-              {/* Surface float body — scaled up for visibility */}
+              {/* Surface float body */}
               <mesh position={[0, 0.3, 0]}>
                 <cylinderGeometry args={[0.35, 0.35, 1.0, 16]} />
                 <meshStandardMaterial
@@ -106,7 +106,7 @@ export const InSituPlatforms: React.FC<InSituPlatformsProps> = ({
                 <meshBasicMaterial color="#ffffff" />
               </mesh>
 
-              {/* Blinking signal beacon */}
+              {/* Signal beacon */}
               <mesh position={[0, 1.5, 0]}>
                 <sphereGeometry args={[0.09, 8, 8]} />
                 <meshBasicMaterial color="#38bdf8" />
@@ -123,11 +123,11 @@ export const InSituPlatforms: React.FC<InSituPlatformsProps> = ({
                     ]);
                   }}
                 />
-                <lineDashedMaterial
+                <lineBasicMaterial
                   attach="material"
                   color={isSelected ? '#38bdf8' : '#f59e0b'}
-                  dashSize={0.25}
-                  gapSize={0.12}
+                  transparent
+                  opacity={0.6}
                 />
               </line>
 

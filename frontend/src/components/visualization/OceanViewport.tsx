@@ -33,7 +33,6 @@ export const OceanViewport: React.FC = () => {
   const depthValues = dataset?.coordinates?.depth?.values || [0];
   let depthIdx = depthValues.findIndex((d) => Math.abs(d - selectedDepth) < 1e-3);
   if (depthIdx === -1) {
-    // Find closest
     depthIdx = depthValues.reduce(
       (bestIdx, d, idx) => (Math.abs(d - selectedDepth) < Math.abs(depthValues[bestIdx] - selectedDepth) ? idx : bestIdx),
       0
@@ -127,18 +126,18 @@ export const OceanViewport: React.FC = () => {
           antialias: true,
           alpha: false,
           powerPreference: 'high-performance',
+          preserveDrawingBuffer: false,
         }}
       >
         <color attach="background" args={['#040A15']} />
 
-        {/* Lighting scheme optimized for subsurface ocean depth perception */}
-        <ambientLight intensity={0.6} color="#dce8f5" />
-        <directionalLight position={[15, 25, 15]} intensity={1.1} color="#ffffff" castShadow />
-        <directionalLight position={[-12, -10, -12]} intensity={0.35} color="#0369a1" />
-        <pointLight position={[0, 10, 0]} intensity={0.25} color="#7dd3fc" />
+        {/* Ambient & directional light */}
+        <ambientLight intensity={0.7} color="#dce8f5" />
+        <directionalLight position={[15, 25, 15]} intensity={1.0} color="#ffffff" />
+        <directionalLight position={[-12, -10, -12]} intensity={0.3} color="#0369a1" />
 
         {/* Camera and Dynamic Preset Animation */}
-        <PerspectiveCamera makeDefault position={[14, 20, 22]} fov={45} />
+        <PerspectiveCamera makeDefault position={[14, 20, 22]} fov={45} near={0.1} far={200} />
         <CameraController />
 
         {/* Interactive Controls */}
@@ -154,20 +153,19 @@ export const OceanViewport: React.FC = () => {
         <Suspense fallback={null}>
           <CoordinateGrid />
 
-          {/* Surface Boundary Plane (0m) */}
-          <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          {/* Surface Boundary Plane (0m) — offset slightly to avoid z-fighting */}
+          <mesh position={[0, 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
             <planeGeometry args={[20, 12]} />
-            <meshStandardMaterial
+            <meshBasicMaterial
               color="#0c6478"
-              roughness={0.4}
-              metalness={0.3}
               transparent
-              opacity={0.2}
+              opacity={0.15}
               side={THREE.DoubleSide}
+              depthWrite={false}
             />
           </mesh>
 
-          {/* Mode 1: Depth Slice (Primary horizontal field) */}
+          {/* Mode 1: Depth Slice */}
           {vizMode === 'slice' && (
             <>
               <DepthSliceMesh />

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import * as THREE from 'three';
 import { useOceanStore } from '../../store/oceanStore';
 import { extractIsosurface } from '../../features/visualization/marchingCubes';
@@ -59,7 +59,14 @@ export const IsosurfaceMesh: React.FC<IsosurfaceMeshProps> = ({
     return extractIsosurface(volumeData.data, isosurfaceThreshold, domain);
   }, [volumeData, isosurfaceThreshold, domain]);
 
-  // Derive color of isosurface from threshold value in the current color palette
+  // Dispose generated marching cubes BufferGeometry on update/unmount
+  useEffect(() => {
+    return () => {
+      if (geometry) geometry.dispose();
+    };
+  }, [geometry]);
+
+  // Derive color of isosurface from threshold value in current color palette
   const surfaceColor = useMemo(() => {
     const t = Math.max(0, Math.min(1, (isosurfaceThreshold - colorMin) / (colorMax - colorMin || 1)));
     const [r, g, b] = samplePalette(colorScale, t);
@@ -77,6 +84,7 @@ export const IsosurfaceMesh: React.FC<IsosurfaceMeshProps> = ({
         transparent
         opacity={0.88}
         side={THREE.DoubleSide}
+        depthWrite={false}
       />
     </mesh>
   );

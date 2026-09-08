@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useOceanStore } from '../../store/oceanStore';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
@@ -13,8 +13,6 @@ import * as THREE from 'three';
 export const CoordinateGrid: React.FC = () => {
   const { showGrid, verticalExaggeration, showBathymetry } = useOceanStore();
 
-  if (!showGrid) return null;
-
   const boxWidth = 20; // Lon
   const boxHeight = 6 * (verticalExaggeration / 5); // Depth
   const boxDepth = 12; // Lat
@@ -25,7 +23,23 @@ export const CoordinateGrid: React.FC = () => {
   const minLat = 0;
   const maxLat = 30;
 
-  // Depth levels for reference lines and labels (normalized: fraction of maxDepthM/5)
+  // Pre-created EdgesGeometry for depth level frames to avoid re-allocating memory in render
+  const edgeGeo = useMemo(() => {
+    const boxGeo = new THREE.BoxGeometry(boxWidth, 0.01, boxDepth);
+    const edges = new THREE.EdgesGeometry(boxGeo);
+    boxGeo.dispose();
+    return edges;
+  }, [boxWidth, boxDepth]);
+
+  useEffect(() => {
+    return () => {
+      edgeGeo.dispose();
+    };
+  }, [edgeGeo]);
+
+  if (!showGrid) return null;
+
+  // Depth levels for reference lines and labels
   const depthLevels = [
     { normDepth: -0.2, depthM: 200 },
     { normDepth: -0.5, depthM: 500 },
@@ -49,18 +63,20 @@ export const CoordinateGrid: React.FC = () => {
           color="#3b82f6"
           wireframe
           transparent
-          opacity={0.12} // Subtler to let data dominate
+          opacity={0.12}
+          depthWrite={false}
         />
       </mesh>
 
-      {/* Surface reference boundary */}
-      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      {/* Surface reference boundary (nudge slightly to y=0.005 to prevent z-fighting with slice at 0) */}
+      <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[boxWidth, boxDepth]} />
         <meshBasicMaterial
           color="#3b82f6"
           wireframe
           transparent
-          opacity={0.10} // Subtler
+          opacity={0.10}
+          depthWrite={false}
         />
       </mesh>
 
@@ -70,32 +86,28 @@ export const CoordinateGrid: React.FC = () => {
           <planeGeometry args={[boxWidth, boxDepth, 16, 16]} />
           <meshBasicMaterial
             color="#091b29"
+            depthWrite={false}
           />
         </mesh>
       )}
 
       {/* Depth level indicator lines + labels */}
       {depthLevels.map(({ normDepth, depthM }) => {
-        // Note: normDepth is already scaled properly so we just multiply by active box height
-        // Since Y mapping is y = -(depth / maxDepth) * activeBoxHeight
         const y = normDepth * boxHeight;
-        if (Math.abs(y) > boxHeight) return null;
+        if (Math.abs(y) > boxHeight + 0.01) return null;
         return (
           <group key={normDepth}>
-            <lineSegments position={[0, y, 0]}>
-              <edgesGeometry
-                args={[new THREE.BoxGeometry(boxWidth, 0.01, boxDepth)]}
-              />
-              <lineBasicMaterial color="#3b82f6" transparent opacity={0.12} /> {/* Subtler */}
+            <lineSegments geometry={edgeGeo} position={[0, y, 0]}>
+              <lineBasicMaterial color="#3b82f6" transparent opacity={0.12} depthWrite={false} />
             </lineSegments>
-            {/* Depth tick label at front-right edge, billboarded */}
+
+            {/* Depth tick label at left edge */}
             <Text
-              position={[boxWidth / 2 + 0.6, y, boxDepth / 2]}
+              position={[-boxWidth / 2 - 0.6, y, boxDepth / 2]}
               fontSize={0.4}
               color="#94a3b8"
-              anchorX="left"
+              anchorX="right"
               anchorY="middle"
-              font={undefined}
             >
               {`${depthM}m`}
             </Text>
@@ -105,17 +117,16 @@ export const CoordinateGrid: React.FC = () => {
 
       {/* Surface depth label (0m) */}
       <Text
-        position={[boxWidth / 2 + 0.6, 0, boxDepth / 2]}
+        position={[-boxWidth / 2 - 0.6, 0, boxDepth / 2]}
         fontSize={0.4}
         color="#94a3b8"
-        anchorX="left"
+        anchorX="right"
         anchorY="middle"
-        font={undefined}
       >
         0m
       </Text>
 
-      {/* Longitude tick labels along the front edge (Z = boxDepth/2, Y = 0) */}
+      {/* Longitude tick labels along the front edge */}
       {lonTicks.filter((_, i) => i % 2 === 0).map((lon) => (
         <Text
           key={`lon-${lon}`}
@@ -124,13 +135,12 @@ export const CoordinateGrid: React.FC = () => {
           color="#94a3b8"
           anchorX="center"
           anchorY="middle"
-          font={undefined}
         >
           {`${lon}°E`}
         </Text>
       ))}
 
-      {/* Latitude tick labels along the right edge (X = boxWidth/2, Y = 0) */}
+      {/* Latitude tick labels along the right edge */}
       {latTicks.filter((_, i) => i % 2 === 0).map((lat) => (
         <Text
           key={`lat-${lat}`}
@@ -139,7 +149,6 @@ export const CoordinateGrid: React.FC = () => {
           color="#94a3b8"
           anchorX="left"
           anchorY="middle"
-          font={undefined}
         >
           {`${lat}°N`}
         </Text>

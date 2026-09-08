@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import * as THREE from 'three';
 import { ThreeEvent } from '@react-three/fiber';
 import { useOceanStore } from '../../store/oceanStore';
@@ -31,8 +31,8 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
   } = useOceanStore();
 
   const activeBoxHeight = boxHeight * (verticalExaggeration / 5);
-  // Negative depth downwards in Three.js coordinates
-  const sliceY = -(selectedDepth / maxDepthMeters) * activeBoxHeight;
+  // Negative depth downwards in Three.js coordinates, with tiny nudge to prevent z-fighting with grid surface
+  const sliceY = -(selectedDepth / maxDepthMeters) * activeBoxHeight - 0.002;
 
   const finalOpacity = overrideOpacity ?? 0.95;
 
@@ -41,7 +41,6 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
     if (!currentSlice || !currentSlice.data || currentSlice.data.length === 0) {
       return null;
     }
-    // Set texture alpha to 255. Opacity is handled by the material properties.
     return createDataTexture(
       currentSlice.data,
       colorMin,
@@ -52,6 +51,13 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
     );
   }, [currentSlice, colorMin, colorMax, colorScale, scaleType]);
 
+  // Dispose texture memory when updated or unmounted
+  useEffect(() => {
+    return () => {
+      if (texture) texture.dispose();
+    };
+  }, [texture]);
+
   const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     if (!e.uv || !currentSlice || !currentSlice.data) return;
@@ -59,7 +65,6 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
     const nLat = currentSlice.data.length;
     const nLon = currentSlice.data[0].length;
 
-    // UV coordinates: x is longitude [0, 1], y is latitude [0, 1]
     const u = Math.max(0, Math.min(1, e.uv.x));
     const v = Math.max(0, Math.min(1, e.uv.y));
 
@@ -93,7 +98,6 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
   };
 
   if (!texture) {
-    // Fallback neutral plane while slice is loading
     return (
       <mesh
         position={[0, sliceY, 0]}
@@ -106,6 +110,7 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
           opacity={0.3}
           side={THREE.DoubleSide}
           toneMapped={false}
+          depthWrite={false}
         />
       </mesh>
     );
@@ -118,13 +123,14 @@ export const DepthSliceMesh: React.FC<DepthSliceMeshProps> = ({
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
     >
-      <planeGeometry args={[boxWidth, boxDepth, 64, 64]} />
+      <planeGeometry args={[boxWidth, boxDepth, 32, 32]} />
       <meshBasicMaterial
         map={texture}
         transparent
         opacity={finalOpacity}
         side={THREE.DoubleSide}
         toneMapped={false}
+        depthWrite={false}
       />
     </mesh>
   );

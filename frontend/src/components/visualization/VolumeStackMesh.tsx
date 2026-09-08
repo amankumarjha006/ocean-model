@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import * as THREE from 'three';
 import { useOceanStore } from '../../store/oceanStore';
 import { createDataTexture } from '../../features/visualization/colorTexture';
@@ -27,39 +27,48 @@ export const VolumeStackMesh: React.FC<VolumeStackMeshProps> = ({
   } = useOceanStore();
 
   const activeBoxHeight = boxHeight * (verticalExaggeration / 5);
-
-  // Enforce minimum opacity so deep layers never disappear
   const clampedOpacity = Math.max(0.20, Math.min(0.80, volumeOpacity));
 
-  // Generate an array of DataTextures, one per depth level in the 3D volume
-  const layerTextures = useMemo(() => {
+  // 1. Generate DataTextures ONLY when volumeData or color parameters change
+  const textures = useMemo(() => {
     if (!volumeData || !volumeData.data || volumeData.data.length === 0) {
       return [];
     }
 
-    const totalLayers = volumeData.data.length;
-    return volumeData.data.map((depthMatrix, idx) => {
-      const depthM = volumeData.depths[idx] ?? 0;
-      const yPos = -(depthM / maxDepthMeters) * activeBoxHeight;
-
-      // Gentle depth-dependent opacity curve:
-      // Surface ~100% of clampedOpacity, deepest ~60% of clampedOpacity.
-      // This ensures deep layers remain clearly visible while surface is slightly stronger.
-      const depthFraction = idx / Math.max(1, totalLayers - 1);
-      const depthAttenuation = 1.0 - depthFraction * 0.4; // range: 1.0 → 0.6
-      const layerOpacity = clampedOpacity * depthAttenuation;
-
-      // Create texture with FULL alpha (255) — let the material opacity handle transparency.
-      // This prevents the double-opacity multiplication bug where texture alpha * material opacity
-      // made deep layers nearly invisible.
-      const tex = createDataTexture(
+    return volumeData.data.map((depthMatrix) =>
+      createDataTexture(
         depthMatrix,
         colorMin,
         colorMax,
         colorScale,
         scaleType,
-        255  // Full alpha — opacity is controlled only by the material
-      );
+        255
+      )
+    );
+  }, [volumeData, colorMin, colorMax, colorScale, scaleType]);
+
+  // 2. Properly dispose GPU DataTextures on update or component unmount
+  useEffect(() => {
+    return () => {
+      textures.forEach((tex) => tex.dispose());
+    };
+  }, [textures]);
+
+  // 3. Compute layer coordinates & opacities without re-creating textures
+  const layers = useMemo(() => {
+    if (!volumeData || !volumeData.depths || textures.length === 0) {
+      return [];
+    }
+
+    const totalLayers = textures.length;
+    return textures.map((tex, idx) => {
+      const depthM = volumeData.depths[idx] ?? 0;
+      // Micro offset to prevent z-fighting between adjacent transparent planes
+      const yPos = -(depthM / maxDepthMeters) * activeBoxHeight - idx * 0.001;
+
+      const depthFraction = idx / Math.max(1, totalLayers - 1);
+      const depthAttenuation = 1.0 - depthFraction * 0.4;
+      const layerOpacity = clampedOpacity * depthAttenuation;
 
       return {
         texture: tex,
@@ -69,22 +78,22 @@ export const VolumeStackMesh: React.FC<VolumeStackMeshProps> = ({
         opacity: layerOpacity,
       };
     });
-  }, [volumeData, activeBoxHeight, colorMin, colorMax, colorScale, scaleType, clampedOpacity, maxDepthMeters]);
+  }, [textures, volumeData, maxDepthMeters, activeBoxHeight, clampedOpacity]);
 
-  if (!layerTextures.length) {
+  if (!layers.length) {
     return null;
   }
 
   return (
     <group>
-      {layerTextures.map((layer) => (
+      {layers.map((layer) => (
         <mesh
           key={`vol-layer-${layer.index}`}
           position={[0, layer.yPos, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
-          renderOrder={1000 - layer.index} // Surface first, deep last — correct back-to-front ordering
+          renderOrder={1000 - layer.index}
         >
-          <planeGeometry args={[boxWidth, boxDepth, 32, 32]} />
+          <planeGeometry args={[boxWidth, boxDepth, 16, 16]} />
           <meshBasicMaterial
             map={layer.texture}
             transparent
